@@ -7,9 +7,17 @@
  */
 
 import type { Database } from '@accessshield/db';
-import { assets, issues, lookupUserByAuthId, organisations, scans, violations } from '@accessshield/db';
+import {
+  assets,
+  issues,
+  lookupUserByAuthId,
+  organisations,
+  priorityConfigs,
+  scans,
+  violations,
+} from '@accessshield/db';
 import type { ApiResponse, IssueSeverity, IssueSummary, PaginationMeta } from '@accessshield/types';
-import { and, count, desc, eq, gte, isNull, sql } from 'drizzle-orm';
+import { and, count, desc, eq, gte, sql } from 'drizzle-orm';
 import type { NextFunction, Request, Response, Router as ExpressRouter } from 'express';
 import { Router } from 'express';
 import { randomUUID } from 'node:crypto';
@@ -20,7 +28,7 @@ import { logger } from '../lib/logger';
 import { sendProblem } from '../lib/problem-details';
 import { requireRoles } from '../middleware/rbac';
 import type { ComplianceStandard, ScanJobMessage, ScanProgress, WcagLevel } from './types';
-import { DEFAULT_SCAN_CONFIG, DEFAULT_VIEWPORTS } from './types';
+import { DEFAULT_SCAN_CONFIG } from './types';
 import { getScanLimit, isScanLimitDisabled } from '../lib/plan-limits';
 import { closeScanQueue, publishScanJob } from './queue';
 import { publishMobileScanJob } from './mobile-queue';
@@ -35,6 +43,7 @@ import { isScanPipelineV2ScanJobsEnabled } from './v2/queues';
 import { publishScanJobsMessage } from './v2/publish';
 import { listIssueSummaries } from './issue-summaries';
 import { syncIssuesFromViolations } from '../services/issue-sync';
+import { prioritizeViolations } from '../services/priority-score';
 
 /** Zod schema for POST /scans request body */
 const createScanSchema = z.object({
@@ -63,7 +72,8 @@ let rabbitChannel: Awaited<
 
 const CANCEL_QUEUE = 'scan_cancellations';
 
-const DEFAULT_STANDARDS: ComplianceStandard[] = ['WCAG22', 'IS17802'];
+/** Global default — India packs (IS17802 / GIGW3 / SEBI) are opt-in per asset/scan. */
+const DEFAULT_STANDARDS: ComplianceStandard[] = ['WCAG22'];
 
 function resolveScanStandards(
   requested: ComplianceStandard[] | undefined,
@@ -696,6 +706,86 @@ export function createScannerRouter(db: Database, redis: Redis): ExpressRouter {
           timestamp: new Date().toISOString(),
         };
 
+        res.json(response);
+      } catch (err) {
+        next(err);
+      }
+    },
+  );
+
+  /**
+   * GET /scans/:id/prioritized — AN-F007 risk-ranked violations + sprint pick.
+   */
+  router.get(
+    '/:id/prioritized',
+    requireRoles('auditor', 'developer', 'accessibility_officer', 'customer_admin'),
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        const scanId = req.params.id ?? '';
+        const orgId = req.user!.org_id;
+
+        if (!scanId || !z.string().uuid().safeParse(scanId).success) {
+          sendProblem(res, 400, 'validation-error', 'Invalid scan ID format');
+          return;
+        }
+
+        const querySchema = z.object({
+          sprintHours: z.coerce.number().positive().max(200).optional(),
+        });
+        const parsed = querySchema.safeParse(req.query);
+        if (!parsed.success) {
+          sendProblem(res, 400, 'validation-error', 'Invalid query parameters', undefined, {
+            errors: parsed.error.flatten().fieldErrors,
+          });
+          return;
+        }
+
+        const [scanCheck] = await db
+          .select({ id: scans.id })
+          .from(scans)
+          .where(and(eq(scans.id, scanId), eq(scans.organisationId, orgId)))
+          .limit(1);
+
+        if (!scanCheck) {
+          sendProblem(res, 404, 'not-found', 'Scan not found');
+          return;
+        }
+
+        const [config] = await db
+          .select()
+          .from(priorityConfigs)
+          .where(eq(priorityConfigs.organisationId, orgId))
+          .limit(1);
+
+        const rows = await db
+          .select({
+            id: violations.id,
+            ruleId: violations.ruleId,
+            impact: violations.impact,
+            description: violations.description,
+            standard: violations.standard,
+            pageUrl: violations.pageUrl,
+          })
+          .from(violations)
+          .where(and(eq(violations.scanId, scanId), eq(violations.organisationId, orgId)));
+
+        const ranked = prioritizeViolations(
+          rows,
+          config
+            ? {
+                userImpact: config.userImpactWeight,
+                regulatoryWeight: config.regulatoryWeight,
+                atCoverage: config.atCoverageWeight,
+                inverseFixComplexity: config.fixComplexityWeight,
+              }
+            : null,
+          parsed.data.sprintHours,
+        );
+
+        const response: ApiResponse<typeof ranked> = {
+          data: ranked,
+          timestamp: new Date().toISOString(),
+        };
         res.json(response);
       } catch (err) {
         next(err);

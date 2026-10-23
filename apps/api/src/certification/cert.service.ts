@@ -11,7 +11,7 @@ import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { GetObjectCommand } from '@aws-sdk/client-s3';
 import crypto from 'crypto';
-import { and, eq, inArray, isNull, notInArray } from 'drizzle-orm';
+import { and, eq, inArray, notInArray } from 'drizzle-orm';
 import { logger } from '../lib/logger';
 import { getSharedS3Client, buildObjectPublicUrl } from '../lib/s3-client';
 import { publishRealtime } from '../lib/realtime/publish';

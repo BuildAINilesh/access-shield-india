@@ -1,10 +1,6 @@
 import type { UserRole } from '@accessshield/types';
 import { logger } from '../lib/logger';
-import type {
-  AuthUserResult,
-  CreateAuthUserInput,
-  IdentityAdmin,
-} from './identity-admin';
+import type { AuthUserResult, CreateAuthUserInput, IdentityAdmin } from './identity-admin';
 
 export interface KeycloakAdminConfig {
   keycloakUrl: string;

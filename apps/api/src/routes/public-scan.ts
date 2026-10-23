@@ -154,7 +154,7 @@ export function createPublicScanRouter(db: Database, redis: Redis): ExpressRoute
         const publicConfig = {
           maxPages: 10,
           wcagLevel: 'AA' as const,
-          standards: ['WCAG22', 'IS17802'] as const,
+          standards: ['WCAG22'] as const,
           excludePaths: [] as string[],
           viewports: DEFAULT_SCAN_CONFIG.viewports!,
         };
@@ -228,6 +228,7 @@ export function createPublicScanRouter(db: Database, redis: Redis): ExpressRoute
           status: scans.status,
           pagesScanned: scans.pagesScanned,
           score: scans.score,
+          errorMessage: scans.errorMessage,
           createdAt: scans.createdAt,
           organisationId: scans.organisationId,
         })
@@ -328,6 +329,7 @@ export function createPublicScanRouter(db: Database, redis: Redis): ExpressRoute
         pagesTotal: number;
         currentUrl?: string;
         score?: number;
+        errorMessage?: string;
         criticalCount: number;
         seriousCount: number;
         moderateCount: number;
@@ -342,6 +344,7 @@ export function createPublicScanRouter(db: Database, redis: Redis): ExpressRoute
           pagesTotal,
           currentUrl,
           score: scan.score ?? undefined,
+          errorMessage: scan.errorMessage ?? undefined,
           criticalCount,
           seriousCount,
           moderateCount,

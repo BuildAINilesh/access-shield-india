@@ -295,8 +295,7 @@ export async function fetchReportData(
     GIGW3: 'GIGW 3.0',
     SEBI: 'SEBI Circular 2024',
   };
-  const standardCodes =
-    scan.standards && scan.standards.length > 0 ? scan.standards : ['WCAG22', 'IS17802'];
+  const standardCodes = scan.standards && scan.standards.length > 0 ? scan.standards : ['WCAG22'];
   const standards = standardCodes.map((code) => STANDARD_LABELS[code] ?? code);
 
   const reportData: ReportTemplateData = {

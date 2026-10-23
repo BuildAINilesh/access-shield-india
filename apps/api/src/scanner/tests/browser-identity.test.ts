@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  SCANNER_LAUNCH_ARGS,
   SITE_BLOCKED_MESSAGE,
   isBlockedHttpStatus,
   looksLikeBlockedPage,
@@ -7,6 +8,10 @@ import {
 } from '../browser-identity';
 
 describe('browser-identity', () => {
+  it('includes AutomationControlled disable in launch args', () => {
+    expect(SCANNER_LAUNCH_ARGS).toContain('--disable-blink-features=AutomationControlled');
+  });
+
   it('treats common WAF status codes as blocked', () => {
     expect(isBlockedHttpStatus(403)).toBe(true);
     expect(isBlockedHttpStatus(401)).toBe(true);

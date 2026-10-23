@@ -2,14 +2,14 @@ import type { PricingDict } from '../types';
 
 export const pricing: PricingDict = {
   page: {
-    title: 'Transparent pricing in Indian Rupees',
+    title: 'Transparent pricing in INR or USD',
     description:
-      'Clear, honest pricing in INR. +18% GST · GST invoice on every payment · No agency fees',
+      'WCAG-first plans with optional India regulatory pack. Toggle INR / USD. GST invoices for India · local tax notes for USD',
     eyebrow: 'Pricing',
   },
   hero: {
-    title: 'Transparent pricing in Indian Rupees',
-    subtitle: '+18% GST · GST invoice on every payment · No agency fees',
+    title: 'Transparent pricing in INR or USD',
+    subtitle: 'WCAG 2.2 AA first · Optional India pack · INR or USD billing',
   },
   oneTime: {
     title: 'One-time compliance',

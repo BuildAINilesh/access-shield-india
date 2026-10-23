@@ -15,11 +15,15 @@ import { logger } from '../lib/logger';
 import type { RawViolation } from './types';
 
 function fingerprint(assetId: string, ruleId: string, selector: string): string {
-  return createHash('sha256').update(`${assetId}:${ruleId}:${selector}`).digest('hex').substring(0, 16);
+  return createHash('sha256')
+    .update(`${assetId}:${ruleId}:${selector}`)
+    .digest('hex')
+    .substring(0, 16);
 }
 
 const HELP_NON_TEXT = 'https://www.w3.org/WAI/WCAG22/Understanding/non-text-content.html';
-const HELP_LINK_PURPOSE = 'https://www.w3.org/WAI/WCAG22/Understanding/link-purpose-in-context.html';
+const HELP_LINK_PURPOSE =
+  'https://www.w3.org/WAI/WCAG22/Understanding/link-purpose-in-context.html';
 const HELP_PAUSE_STOP = 'https://www.w3.org/WAI/WCAG22/Understanding/pause-stop-hide.html';
 const HELP_STATUS = 'https://www.w3.org/WAI/WCAG22/Understanding/status-messages.html';
 
@@ -129,10 +133,7 @@ export async function checkDuplicateLinkText(
 ): Promise<RawViolation[]> {
   const groups = await page.evaluate(() => {
     const anchors = Array.from(document.querySelectorAll('a[href]'));
-    const byText = new Map<
-      string,
-      Array<{ href: string; html: string; selector: string }>
-    >();
+    const byText = new Map<string, Array<{ href: string; html: string; selector: string }>>();
 
     anchors.forEach((el, index) => {
       const a = el as HTMLAnchorElement;
@@ -358,7 +359,8 @@ export async function checkCountdownTimers(
 
     const later = secondBySelector.get(snap.selector);
     const textChanged = Boolean(later && later.text !== snap.text);
-    const countdownShaped = looksLikeCountdown(snap.text) || (later ? looksLikeCountdown(later.text) : false);
+    const countdownShaped =
+      looksLikeCountdown(snap.text) || (later ? looksLikeCountdown(later.text) : false);
 
     const firstNum = Number.parseInt(snap.text.replace(/[^\d]/g, ''), 10);
     const secondNum = later ? Number.parseInt(later.text.replace(/[^\d]/g, ''), 10) : NaN;

@@ -74,6 +74,11 @@ export function MarketingFooter() {
                 </LocaleLink>
               </li>
               <li>
+                <LocaleLink href="/features" className={footerLinkClass}>
+                  {f.links.features}
+                </LocaleLink>
+              </li>
+              <li>
                 <LocaleLink href="/widget" className={footerLinkClass}>
                   {f.links.widget}
                 </LocaleLink>

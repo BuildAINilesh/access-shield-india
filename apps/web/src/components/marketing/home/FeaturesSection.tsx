@@ -161,6 +161,16 @@ export function FeaturesSection({ locale }: { locale: Locale }) {
             );
           })}
         </div>
+
+        <p className="mt-12 text-center">
+          <Link
+            href={localizedHref('/features', locale)}
+            className="inline-flex min-h-11 items-center gap-1 text-base font-semibold text-primary-600 underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 rounded-sm"
+          >
+            Explore platform features
+            <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          </Link>
+        </p>
       </div>
     </section>
   );

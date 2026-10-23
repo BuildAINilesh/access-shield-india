@@ -16,6 +16,7 @@ import {
 } from './redis-keys';
 import { clearScanBarrier, getScanBarrier } from './barrier';
 import { summarisePageScanFailures } from '../browser-identity';
+import { deliverWebhookEvent } from '../../services/webhooks';
 
 const TERMINAL = new Set(['completed', 'failed', 'cancelled', 'skipped']);
 
@@ -175,6 +176,16 @@ export async function tryFinalizeScanFromPageJobs(
   // Issue sync is enqueued by the caller (findings persister / page worker) via issues.sync
   await clearProgressKey(scanId);
   await clearScanBarrier(scanId);
+
+  void deliverWebhookEvent(db, orgId, 'scan.completed', {
+    scanId,
+    assetId,
+    score: Math.round(scoreResult.score),
+    violationCount: rows.length,
+    pagesScanned: completedCount,
+  }).catch((err) => {
+    logger.warn({ err, scanId }, 'scan.completed webhook failed');
+  });
 
   logger.info(
     {

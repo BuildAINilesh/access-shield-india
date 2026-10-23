@@ -5,6 +5,7 @@ import { dashboard } from './dashboard';
 import { auth } from './auth';
 import { pages } from './pages';
 import { pricing } from './pricing';
+import { features } from './features';
 
 export const en: Dictionary = {
   common,
@@ -13,4 +14,5 @@ export const en: Dictionary = {
   auth,
   pages,
   pricing,
+  features,
 };

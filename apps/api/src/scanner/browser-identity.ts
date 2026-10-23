@@ -18,6 +18,48 @@ export const SCANNER_HTTP_HEADERS: Record<string, string> = {
   'Upgrade-Insecure-Requests': '1',
 };
 
+/**
+ * Chromium launch args that reduce obvious automation fingerprints.
+ * Sites like sbilife.co.in return 403 to stock headless Playwright.
+ */
+export const SCANNER_LAUNCH_ARGS = [
+  '--no-sandbox',
+  '--disable-dev-shm-usage',
+  '--disable-setuid-sandbox',
+  '--disable-gpu',
+  '--no-first-run',
+  '--disable-extensions',
+  '--disable-blink-features=AutomationControlled',
+] as const;
+
+/**
+ * Soften Playwright automation signals on a new browser context.
+ * Does not guarantee bypass of strong WAFs — only reduces easy fingerprints.
+ */
+export async function applyScannerStealth(
+  context: import('playwright').BrowserContext,
+): Promise<void> {
+  await context.addInitScript(() => {
+    Object.defineProperty(navigator, 'webdriver', {
+      get: () => undefined,
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const win = globalThis as any;
+    if (win.chrome == null) {
+      win.chrome = { runtime: {} };
+    }
+
+    Object.defineProperty(navigator, 'languages', {
+      get: () => ['en-IN', 'en', 'hi'],
+    });
+
+    Object.defineProperty(navigator, 'plugins', {
+      get: () => [1, 2, 3, 4, 5],
+    });
+  });
+}
+
 /** Shown on the scan detail page when a WAF / bot wall blocks access. */
 export const SITE_BLOCKED_MESSAGE =
   'This website blocked the accessibility scanner (bot protection or firewall). ' +
@@ -79,10 +121,7 @@ export function looksLikeBlockedPage(html: string | null | undefined): boolean {
 /**
  * Build a user-facing scan failure summary from per-page errors.
  */
-export function summarisePageScanFailures(
-  pageCount: number,
-  failureMessages: string[],
-): string {
+export function summarisePageScanFailures(pageCount: number, failureMessages: string[]): string {
   const blocked = failureMessages.some(
     (msg) =>
       msg.includes(SITE_BLOCKED_MESSAGE) ||
@@ -90,10 +129,7 @@ export function summarisePageScanFailures(
   );
 
   if (blocked) {
-    return `${SITE_BLOCKED_MESSAGE} (${pageCount} page(s) could not be opened.)`.substring(
-      0,
-      1000,
-    );
+    return `${SITE_BLOCKED_MESSAGE} (${pageCount} page(s) could not be opened.)`.substring(0, 1000);
   }
 
   const sample = failureMessages

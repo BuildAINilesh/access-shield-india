@@ -61,6 +61,7 @@ build/
 out/
 .next/
 .turbo/
+.accessiblenow/
 .nuxt/
 .output/
 *.tsbuildinfo

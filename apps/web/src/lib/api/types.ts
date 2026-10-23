@@ -181,6 +181,10 @@ export interface Issue {
   resolvedBy: string | null;
   createdAt: string;
   updatedAt: string;
+  /** AN-F007 risk score 0–100 (when returned by list API) */
+  priorityScore?: number;
+  estimatedFixHours?: number;
+  scoreExplanation?: string;
   asset?: Asset;
   assignee?: User;
   violation?: ViolationRow;
@@ -229,6 +233,8 @@ export interface IssueFilters {
   dateFrom?: string;
   dateTo?: string;
   page?: string;
+  /** newest (default) | priority — AN-F007 risk ranking */
+  sort?: 'newest' | 'priority';
 }
 
 export interface IssueStats {

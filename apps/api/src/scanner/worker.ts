@@ -38,6 +38,7 @@ import { runIS17802Rules } from './rules/is17802';
 import { runSebiChecks } from './rules/sebi';
 import { buildScanScoreResult } from './score';
 import type { RawViolation, ScanJobMessage, ScanProgress, ScanCancelMessage } from './types';
+import { deliverWebhookEvent } from '../services/webhooks';
 import { syncIssuesFromViolations } from '../services/issue-sync';
 import { markScanPageJobStatus, upsertScanPageJob } from './v2/page-jobs';
 import { isScanPipelineV2PageWorkerEnabled } from './v2/queues';
@@ -324,7 +325,10 @@ async function processScanJob(message: ScanJobMessage): Promise<void> {
         });
         pageJobIdsByUrl.set(url, id);
       } catch (err) {
-        logger.warn({ err, scanId, url }, 'Failed to upsert scan_page_job (is migration 0005 applied?)');
+        logger.warn(
+          { err, scanId, url },
+          'Failed to upsert scan_page_job (is migration 0005 applied?)',
+        );
       }
     }
 
@@ -662,6 +666,16 @@ async function processScanJob(message: ScanJobMessage): Promise<void> {
       .where(and(eq(assets.id, assetId), eq(assets.organisationId, orgId)));
 
     await clearProgress(scanId);
+
+    void deliverWebhookEvent(db, orgId, 'scan.completed', {
+      scanId,
+      assetId,
+      score: Math.round(scoreResult.score),
+      violationCount: deduplicatedViolations.length,
+      pagesScanned,
+    }).catch((err) => {
+      logger.warn({ err, scanId }, 'scan.completed webhook failed');
+    });
 
     if (orgId === PUBLIC_SCANS_ORG_ID) {
       try {

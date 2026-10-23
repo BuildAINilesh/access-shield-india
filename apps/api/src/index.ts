@@ -20,8 +20,13 @@ import { createAssetsRouter } from './routes/assets';
 import { createBillingRouter } from './routes/billing';
 import { createDashboardRouter } from './routes/dashboard';
 import { createHealthRouter } from './routes/health';
+import { createCodeRouter } from './routes/code';
+import { createFixesRouter } from './routes/fixes';
 import { createIntegrationsRouter } from './routes/integrations';
+import { createIntelligenceRouter } from './routes/intelligence';
 import { createIssuesRouter } from './routes/issues';
+import { createOssRouter } from './routes/oss';
+import { createWebhooksRouter } from './routes/webhooks';
 import { createNotificationsRouter } from './routes/notifications';
 import { createOrganisationRouter } from './routes/organisation';
 import { createUsersRouter } from './routes/users';
@@ -121,6 +126,13 @@ async function bootstrap() {
   const publicWidgetRouter = createPublicWidgetRouter(db, redis);
   app.use('/api/v1/widget', publicWidgetRouter);
 
+  // AN OSS + Intelligence — public so @accessiblenow/scan CLI works without JWT
+  const ossRouter = createOssRouter(db, redis);
+  app.use('/api/v1/oss', ossRouter);
+
+  const intelligenceRouter = createIntelligenceRouter(db);
+  app.use('/api/v1/intelligence', intelligenceRouter);
+
   const authMiddleware = createAuthMiddleware(secrets, db);
   app.use('/api/v1', authMiddleware);
 
@@ -166,6 +178,15 @@ async function bootstrap() {
 
   const integrationsRouter = createIntegrationsRouter(db);
   app.use('/api/v1/integrations', integrationsRouter);
+
+  const codeRouter = createCodeRouter(db);
+  app.use('/api/v1/code', codeRouter);
+
+  const fixesRouter = createFixesRouter(db);
+  app.use('/api/v1/fixes', fixesRouter);
+
+  const webhooksRouter = createWebhooksRouter(db);
+  app.use('/api/v1/webhooks', webhooksRouter);
 
   const adminRouter = createAdminRouter(db, secrets, redis);
   app.use('/api/v1/admin', adminRouter);

@@ -1,0 +1,37 @@
+name: OSS PR Gate
+
+on:
+  pull_request:
+    paths:
+      - '**/package.json'
+      - 'pnpm-lock.yaml'
+      - 'package.json'
+      - '.github/actions/oss-pr-gate/**'
+      - '.github/workflows/oss-pr-gate.yml'
+
+concurrency:
+  group: oss-pr-gate-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  scan:
+    name: Scan package.json a11y risks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: AccessibleNow OSS PR Gate
+        uses: ./.github/actions/oss-pr-gate
+        with:
+          # Prefer repo Variable; fall back to Secret. Required for CI.
+          api-url: ${{ vars.ACCESSIBLENOW_API_URL || secrets.ACCESSIBLENOW_API_URL }}
+          fail-on: high
+          include-dev: 'true'
+          comment: 'true'

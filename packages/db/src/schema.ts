@@ -163,7 +163,7 @@ export const assets = pgTable(
     standards: text('standards')
       .array()
       .notNull()
-      .default(['WCAG22', 'IS17802']),
+      .default(['WCAG22']),
     ...timestamps,
   },
   (table) => ({
@@ -196,7 +196,7 @@ export const scans = pgTable(
     standards: text('standards')
       .array()
       .notNull()
-      .default(['WCAG22', 'IS17802']),
+      .default(['WCAG22']),
     ...timestamps,
   },
   (table) => ({
@@ -536,7 +536,7 @@ export const documentScanJobs = pgTable(
     standards: text('standards')
       .array()
       .notNull()
-      .default(['WCAG_2_1_AA', 'GIGW_3_0', 'PDF_UA', 'IS_17802']),
+      .default(['WCAG_2_1_AA', 'PDF_UA']),
     errorMessage: text('error_message'),
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
       .notNull()
@@ -723,5 +723,261 @@ export const widgetAnalyticsDailyRelations = relations(widgetAnalyticsDaily, ({ 
   organisation: one(organisations, {
     fields: [widgetAnalyticsDaily.organisationId],
     references: [organisations.id],
+  }),
+}));
+
+// ─── AN Code / AN Fix (Phase 1) ──────────────────────────────────────────────
+
+/** Cached IDE / snippet analysis results (AN-F001) */
+export const codeDiagnostics = pgTable(
+  'code_diagnostics',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    organisationId: orgId(),
+    sessionId: varchar('session_id', { length: 128 }),
+    fileHash: varchar('file_hash', { length: 64 }).notNull(),
+    filetype: varchar('filetype', { length: 32 }).notNull(),
+    violationsJson: jsonb('violations_json').notNull().$type<unknown[]>(),
+    ...timestamps,
+  },
+  (table) => ({
+    orgIdx: index('code_diagnostics_org_idx').on(table.organisationId),
+    hashIdx: index('code_diagnostics_hash_idx').on(table.fileHash),
+  }),
+);
+
+/** Pre-approved fix patterns for common violation types (AN-F005) */
+export const fixTemplates = pgTable(
+  'fix_templates',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    violationType: varchar('violation_type', { length: 100 }).notNull(),
+    patternRegex: text('pattern_regex'),
+    fixTemplate: text('fix_template').notNull(),
+    explanation: text('explanation').notNull(),
+    confidenceOverride: varchar('confidence_override', { length: 16 })
+      .notNull()
+      .default('high'),
+    ...timestamps,
+  },
+  (table) => ({
+    typeIdx: index('fix_templates_type_idx').on(table.violationType),
+  }),
+);
+
+/** Generated fix suggestions cache (AN-F005) */
+export const fixSuggestions = pgTable(
+  'fix_suggestions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    organisationId: orgId(),
+    violationId: uuid('violation_id'),
+    ruleId: varchar('rule_id', { length: 100 }).notNull(),
+    codeHash: varchar('code_hash', { length: 64 }).notNull(),
+    fixCode: text('fix_code').notNull(),
+    diff: text('diff'),
+    explanation: text('explanation'),
+    confidence: varchar('confidence', { length: 16 }).notNull().default('medium'),
+    modelVersion: varchar('model_version', { length: 100 }),
+    ...timestamps,
+  },
+  (table) => ({
+    orgIdx: index('fix_suggestions_org_idx').on(table.organisationId),
+    hashIdx: index('fix_suggestions_hash_idx').on(table.codeHash),
+  }),
+);
+
+/** Applied fix audit log (AN-F005) */
+export const fixApplications = pgTable(
+  'fix_applications',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    organisationId: orgId(),
+    fixId: uuid('fix_id').references(() => fixSuggestions.id, { onDelete: 'set null' }),
+    repo: varchar('repo', { length: 255 }),
+    prNumber: integer('pr_number'),
+    filePath: text('file_path'),
+    appliedBy: uuid('applied_by'),
+    commitSha: varchar('commit_sha', { length: 64 }),
+    ...timestamps,
+  },
+  (table) => ({
+    orgIdx: index('fix_applications_org_idx').on(table.organisationId),
+  }),
+);
+
+export const codeDiagnosticsRelations = relations(codeDiagnostics, ({ one }) => ({
+  organisation: one(organisations, {
+    fields: [codeDiagnostics.organisationId],
+    references: [organisations.id],
+  }),
+}));
+
+export const fixSuggestionsRelations = relations(fixSuggestions, ({ one }) => ({
+  organisation: one(organisations, {
+    fields: [fixSuggestions.organisationId],
+    references: [organisations.id],
+  }),
+}));
+
+export const fixApplicationsRelations = relations(fixApplications, ({ one }) => ({
+  organisation: one(organisations, {
+    fields: [fixApplications.organisationId],
+    references: [organisations.id],
+  }),
+  suggestion: one(fixSuggestions, {
+    fields: [fixApplications.fixId],
+    references: [fixSuggestions.id],
+  }),
+}));
+
+/** Org-specific priority scoring weights (AN-F007) */
+export const priorityConfigs = pgTable(
+  'priority_configs',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    organisationId: orgId(),
+    userImpactWeight: doublePrecision('user_impact_weight').notNull().default(0.4),
+    regulatoryWeight: doublePrecision('regulatory_weight').notNull().default(0.3),
+    atCoverageWeight: doublePrecision('at_coverage_weight').notNull().default(0.2),
+    fixComplexityWeight: doublePrecision('fix_complexity_weight').notNull().default(0.1),
+    ...timestamps,
+  },
+  (table) => ({
+    orgUnique: uniqueIndex('priority_configs_org_uidx').on(table.organisationId),
+  }),
+);
+
+/** Outbound webhook endpoints (AN-F010) */
+export const orgWebhooks = pgTable(
+  'org_webhooks',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    organisationId: orgId(),
+    url: text('url').notNull(),
+    secret: varchar('secret', { length: 128 }).notNull(),
+    events: text('events').array().notNull(),
+    isActive: boolean('is_active').notNull().default(true),
+    ...timestamps,
+    deletedAt: timestamp('deleted_at', { withTimezone: true, mode: 'string' }),
+  },
+  (table) => ({
+    orgIdx: index('org_webhooks_org_idx').on(table.organisationId),
+  }),
+);
+
+export const webhookDeliveries = pgTable(
+  'webhook_deliveries',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    organisationId: orgId(),
+    webhookId: uuid('webhook_id')
+      .notNull()
+      .references(() => orgWebhooks.id, { onDelete: 'cascade' }),
+    eventType: varchar('event_type', { length: 64 }).notNull(),
+    status: varchar('status', { length: 32 }).notNull().default('pending'),
+    attempts: integer('attempts').notNull().default(0),
+    lastError: text('last_error'),
+    payloadJson: jsonb('payload_json'),
+    ...timestamps,
+  },
+  (table) => ({
+    orgIdx: index('webhook_deliveries_org_idx').on(table.organisationId),
+    webhookIdx: index('webhook_deliveries_webhook_idx').on(table.webhookId),
+  }),
+);
+
+export const priorityConfigsRelations = relations(priorityConfigs, ({ one }) => ({
+  organisation: one(organisations, {
+    fields: [priorityConfigs.organisationId],
+    references: [organisations.id],
+  }),
+}));
+
+export const orgWebhooksRelations = relations(orgWebhooks, ({ one, many }) => ({
+  organisation: one(organisations, {
+    fields: [orgWebhooks.organisationId],
+    references: [organisations.id],
+  }),
+  deliveries: many(webhookDeliveries),
+}));
+
+export const webhookDeliveriesRelations = relations(webhookDeliveries, ({ one }) => ({
+  organisation: one(organisations, {
+    fields: [webhookDeliveries.organisationId],
+    references: [organisations.id],
+  }),
+  webhook: one(orgWebhooks, {
+    fields: [webhookDeliveries.webhookId],
+    references: [orgWebhooks.id],
+  }),
+}));
+
+// ─── AN OSS / Intelligence (AN-F002 / AN-F004) ───────────────────────────────
+
+/** Curated accessibility issues in npm packages */
+export const a11yPackageIssues = pgTable(
+  'a11y_package_issues',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    anId: varchar('an_id', { length: 32 }).notNull(),
+    packageName: varchar('package_name', { length: 255 }).notNull(),
+    title: text('title').notNull(),
+    issueType: varchar('issue_type', { length: 64 }).notNull(),
+    severity: varchar('severity', { length: 16 }).notNull(),
+    atAffected: text('at_affected').array(),
+    description: text('description').notNull(),
+    fixStatus: varchar('fix_status', { length: 32 }).notNull().default('open'),
+    workaround: text('workaround'),
+    ...timestamps,
+  },
+  (table) => ({
+    anIdUnique: uniqueIndex('a11y_package_issues_an_id_uidx').on(table.anId),
+    packageIdx: index('a11y_package_issues_package_idx').on(table.packageName),
+  }),
+);
+
+/** Semver ranges affected by a package issue */
+export const a11yPackageVersions = pgTable(
+  'a11y_package_versions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    issueId: uuid('issue_id')
+      .notNull()
+      .references(() => a11yPackageIssues.id, { onDelete: 'cascade' }),
+    versionRange: varchar('version_range', { length: 128 }).notNull(),
+    fixedInVersion: varchar('fixed_in_version', { length: 64 }),
+    ...timestamps,
+  },
+  (table) => ({
+    issueIdx: index('a11y_package_versions_issue_idx').on(table.issueId),
+  }),
+);
+
+/** Community submissions awaiting curator review */
+export const a11yIssueReports = pgTable(
+  'a11y_issue_reports',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    packageName: varchar('package_name', { length: 255 }).notNull(),
+    version: varchar('version', { length: 64 }),
+    description: text('description').notNull(),
+    reporterEmail: varchar('reporter_email', { length: 255 }),
+    status: varchar('status', { length: 32 }).notNull().default('pending'),
+    ...timestamps,
+  },
+  (table) => ({
+    statusIdx: index('a11y_issue_reports_status_idx').on(table.status),
+  }),
+);
+
+export const a11yPackageIssuesRelations = relations(a11yPackageIssues, ({ many }) => ({
+  versions: many(a11yPackageVersions),
+}));
+
+export const a11yPackageVersionsRelations = relations(a11yPackageVersions, ({ one }) => ({
+  issue: one(a11yPackageIssues, {
+    fields: [a11yPackageVersions.issueId],
+    references: [a11yPackageIssues.id],
   }),
 }));

@@ -109,6 +109,9 @@ export function MarketingNav() {
             )}
           </div>
 
+          <LocaleLink href="/features" className={navLinkClass}>
+            {common.nav.features}
+          </LocaleLink>
           <LocaleLink href="/widget" className={navLinkClass}>
             {common.nav.widget}
           </LocaleLink>

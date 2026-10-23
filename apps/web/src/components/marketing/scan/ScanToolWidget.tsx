@@ -27,6 +27,7 @@ interface ScanResult {
   pagesTotal: number;
   currentUrl?: string;
   score?: number;
+  errorMessage?: string;
   criticalCount: number;
   seriousCount: number;
   moderateCount: number;
@@ -79,9 +80,7 @@ export function ScanToolWidget() {
       if (!response.ok) {
         const errorData = await response.json();
         if (response.status === 429) {
-          setError(
-            'Too many scans from this network right now. Please try again later.',
-          );
+          setError('Too many scans from this network right now. Please try again later.');
         } else if (response.status === 422) {
           setError(errorData.detail || 'Could not reach this website. Please check the URL.');
         } else {
@@ -139,7 +138,9 @@ export function ScanToolWidget() {
           clearInterval(pollIntervalRef.current!);
           setState('error');
           setError(
-            "We couldn't complete this scan. This can happen with sites that block automated tools. Try a different URL or contact us.",
+            typeof data.errorMessage === 'string' && data.errorMessage.trim().length > 0
+              ? data.errorMessage
+              : "We couldn't complete this scan. This can happen with sites that block automated tools. Try a different URL or contact us.",
           );
         }
       } catch (err) {
@@ -436,7 +437,9 @@ export function ScanToolWidget() {
                       {severityConfig[violation.impact].label}
                     </Badge>
                     <div className="flex-1">
-                      <div className="text-sm font-medium text-text-primary">{violation.ruleId}</div>
+                      <div className="text-sm font-medium text-text-primary">
+                        {violation.ruleId}
+                      </div>
                       <p className="mt-1 text-sm leading-normal text-text-secondary">
                         {violation.description}
                       </p>

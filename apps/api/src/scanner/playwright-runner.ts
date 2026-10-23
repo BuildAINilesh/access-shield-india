@@ -9,8 +9,10 @@
 import { logger } from '../lib/logger';
 import {
   SCANNER_HTTP_HEADERS,
+  SCANNER_LAUNCH_ARGS,
   SCANNER_USER_AGENT,
   SiteBlockedError,
+  applyScannerStealth,
   isBlockedHttpStatus,
   looksLikeBlockedPage,
 } from './browser-identity';
@@ -51,14 +53,8 @@ export async function createBrowser(): Promise<Browser> {
   const chromium = await getChromium();
   const browser = await chromium.launch({
     headless: true,
-    args: [
-      '--no-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-setuid-sandbox',
-      '--disable-gpu',
-      '--no-first-run',
-      '--disable-extensions',
-    ],
+    ignoreDefaultArgs: ['--enable-automation'],
+    args: [...SCANNER_LAUNCH_ARGS],
   });
 
   logger.info('Playwright browser launched');
@@ -233,11 +229,7 @@ async function takeScreenshot(page: Page, fullPage = false): Promise<Buffer | nu
  * Fail fast with a clear message when the edge returns 403/challenge HTML
  * instead of the real page (common on .nic.in / Cloudflare hosts).
  */
-async function assertPageNotBlocked(
-  page: Page,
-  url: string,
-  status: number | null,
-): Promise<void> {
+async function assertPageNotBlocked(page: Page, url: string, status: number | null): Promise<void> {
   if (isBlockedHttpStatus(status)) {
     logger.warn({ url, status }, 'Site returned a blocked HTTP status to the scanner');
     throw new SiteBlockedError(undefined, status ?? undefined);
@@ -302,6 +294,7 @@ export async function scanPage(
     // A11Y: scanners must inject axe-core; strict CSP blocks script tags without this.
     bypassCSP: true,
   });
+  await applyScannerStealth(context);
 
   const page = await context.newPage();
 

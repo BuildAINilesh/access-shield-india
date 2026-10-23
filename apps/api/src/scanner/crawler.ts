@@ -14,6 +14,7 @@ import {
   SCANNER_HTTP_HEADERS,
   SCANNER_USER_AGENT,
   SiteBlockedError,
+  applyScannerStealth,
   isBlockedHttpStatus,
   looksLikeBlockedPage,
 } from './browser-identity';
@@ -290,10 +291,7 @@ async function collectUrlsFromSitemapDoc(
     return [];
   }
   if (depth > MAX_SITEMAP_DEPTH || counters.docs >= MAX_SITEMAP_DOCS) {
-    logger.warn(
-      { sitemapUrl, depth, docs: counters.docs },
-      'Sitemap recursion limit reached',
-    );
+    logger.warn({ sitemapUrl, depth, docs: counters.docs }, 'Sitemap recursion limit reached');
     return [];
   }
 
@@ -331,25 +329,13 @@ async function collectUrlsFromSitemapDoc(
       'Following sitemap index children',
     );
     for (const child of childSitemaps) {
-      const nested = await collectUrlsFromSitemapDoc(
-        child,
-        baseUrl,
-        visited,
-        depth + 1,
-        counters,
-      );
+      const nested = await collectUrlsFromSitemapDoc(child, baseUrl, visited, depth + 1, counters);
       pageUrls.push(...nested);
     }
   } else if (childSitemaps.length > 0) {
     // Mixed urlset: keep pages and also expand nested sitemap refs
     for (const child of childSitemaps) {
-      const nested = await collectUrlsFromSitemapDoc(
-        child,
-        baseUrl,
-        visited,
-        depth + 1,
-        counters,
-      );
+      const nested = await collectUrlsFromSitemapDoc(child, baseUrl, visited, depth + 1, counters);
       pageUrls.push(...nested);
     }
   }
@@ -393,13 +379,7 @@ export async function fetchSitemap(baseUrl: string): Promise<string[]> {
   const seenPage = new Set<string>();
 
   for (const sitemapUrl of candidates) {
-    const urls = await collectUrlsFromSitemapDoc(
-      sitemapUrl,
-      baseUrl,
-      visited,
-      0,
-      counters,
-    );
+    const urls = await collectUrlsFromSitemapDoc(sitemapUrl, baseUrl, visited, 0, counters);
     for (const url of urls) {
       const key = normalizeUrl(url);
       if (seenPage.has(key)) continue;
@@ -443,6 +423,7 @@ async function crawlHomepage(browser: Browser, baseUrl: string): Promise<string[
       ignoreHTTPSErrors: true,
       bypassCSP: true,
     });
+    await applyScannerStealth(context);
 
     page = await context.newPage();
 
@@ -471,7 +452,10 @@ async function crawlHomepage(browser: Browser, baseUrl: string): Promise<string[
         return (doc.body?.innerText ?? '').slice(0, 4000);
       })
       .catch(() => '');
-    if (looksLikeBlockedPage(bodySample) || looksLikeBlockedPage(await page.content().catch(() => ''))) {
+    if (
+      looksLikeBlockedPage(bodySample) ||
+      looksLikeBlockedPage(await page.content().catch(() => ''))
+    ) {
       throw new SiteBlockedError(undefined, status ?? undefined);
     }
 
@@ -520,11 +504,7 @@ async function crawlHomepage(browser: Browser, baseUrl: string): Promise<string[
 /**
  * Resolve and filter a discovered href. Does not mutate seen set.
  */
-function filterDiscoveredHref(
-  baseUrl: string,
-  href: string,
-  config: ScanJobConfig,
-): string | null {
+function filterDiscoveredHref(baseUrl: string, href: string, config: ScanJobConfig): string | null {
   const absoluteUrl = buildAbsoluteUrl(baseUrl, href);
   if (!absoluteUrl) return null;
   if (!isSameDomain(baseUrl, absoluteUrl)) return null;

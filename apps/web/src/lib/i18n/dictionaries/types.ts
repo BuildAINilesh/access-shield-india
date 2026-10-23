@@ -5,6 +5,7 @@ export interface Dictionary {
   auth: AuthDict;
   pages: PagesDict;
   pricing: PricingDict;
+  features: FeaturesDict;
 }
 
 export interface CommonDict {
@@ -13,6 +14,7 @@ export interface CommonDict {
     mainAria: string;
     home: string;
     services: string;
+    features: string;
     widget: string;
     documentScanner: string;
     blog: string;
@@ -48,6 +50,7 @@ export interface CommonDict {
       sebi: string;
       freeScan: string;
       services: string;
+      features: string;
       widget: string;
       documentScanner: string;
       docs: string;
@@ -207,7 +210,11 @@ export interface HomeDict {
     previewAmount: string;
     previewStatusLabel: string;
     previewPay: string;
-    modes: { id: 'normal' | 'lowVision' | 'colourBlind' | 'cataract'; label: string; insight: string }[];
+    modes: {
+      id: 'normal' | 'lowVision' | 'colourBlind' | 'cataract';
+      label: string;
+      insight: string;
+    }[];
     cta: string;
   };
   calculator: {
@@ -576,4 +583,61 @@ export interface PricingDict {
   };
   billing: { monthly: string; annual: string; save: string; exclGst: string };
   freeTier: { name: string; description: string; cta: string; signupCta: string };
+}
+
+export interface FeatureItemCopy {
+  name: string;
+  tagline: string;
+  snykParallel: string;
+  summary: string;
+  userStories: string[];
+  capabilities: string[];
+}
+
+export interface FeaturesDict {
+  meta: { title: string; description: string };
+  hub: {
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+    filterAria: string;
+    filterAll: string;
+    filterPhase: string;
+    emptyFilter: string;
+    viewDetails: string;
+  };
+  phases: { 1: string; 2: string; 3: string };
+  status: {
+    available: string;
+    in_progress: string;
+    coming_soon: string;
+  };
+  detail: {
+    backToHub: string;
+    userStoriesHeading: string;
+    capabilitiesHeading: string;
+    phaseLabel: string;
+    statusLabel: string;
+    snykLabel: string;
+  };
+  cta: {
+    waitlist: string;
+    contact: string;
+    freeScan: string;
+    pricing: string;
+  };
+  items: {
+    code: FeatureItemCopy;
+    'open-source': FeatureItemCopy;
+    fix: FeatureItemCopy;
+    'priority-score': FeatureItemCopy;
+    integrations: FeatureItemCopy;
+    dynamic: FeatureItemCopy;
+    intelligence: FeatureItemCopy;
+    learn: FeatureItemCopy;
+    policy: FeatureItemCopy;
+    posture: FeatureItemCopy;
+    analytics: FeatureItemCopy;
+    red: FeatureItemCopy;
+  };
 }

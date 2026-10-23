@@ -1,0 +1,61 @@
+{
+  "name": "accessiblenow-code",
+  "displayName": "AccessibleNow Code",
+  "description": "Inline accessibility diagnostics for HTML/JSX/TSX — AN-F001",
+  "version": "0.1.0",
+  "publisher": "accessiblenow",
+  "private": true,
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Linters", "Other"],
+  "activationEvents": [
+    "onLanguage:html",
+    "onLanguage:javascriptreact",
+    "onLanguage:typescriptreact"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "accessiblenow.analyzeFile",
+        "title": "AccessibleNow: Analyze Accessibility"
+      },
+      {
+        "command": "accessiblenow.applyQuickFix",
+        "title": "AccessibleNow: Apply Quick Fix"
+      }
+    ],
+    "configuration": {
+      "title": "AccessibleNow Code",
+      "properties": {
+        "accessiblenow.apiUrl": {
+          "type": "string",
+          "default": "http://localhost:4000",
+          "description": "AccessibleNow API base URL (no trailing slash)"
+        },
+        "accessiblenow.apiToken": {
+          "type": "string",
+          "default": "",
+          "description": "Bearer JWT for /api/v1/code endpoints"
+        },
+        "accessiblenow.analyzeOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Run accessibility analysis when saving HTML/JSX/TSX files"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "type-check": "tsc --noEmit -p ./",
+    "package": "vsce package --no-dependencies"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.5.2"
+  }
+}

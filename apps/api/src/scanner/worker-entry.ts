@@ -18,10 +18,7 @@ loadLocalEnv();
 
 import { logger } from '../lib/logger';
 import { shutdown, startWorker } from './worker';
-import {
-  isScanPipelineV2Enabled,
-  isScanPipelineV2ScanJobsEnabled,
-} from './v2/queues';
+import { isScanPipelineV2Enabled, isScanPipelineV2ScanJobsEnabled } from './v2/queues';
 import { shutdownPageScanWorker, startPageScanWorker } from './v2/page-scan-worker';
 import {
   shutdownFindingsPersistWorker,

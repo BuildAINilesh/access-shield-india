@@ -2,30 +2,30 @@ import type { HomeDict } from '../types';
 
 export const home: HomeDict = {
   meta: {
-    title: 'Accessible to all Indians. Auditable for your regulators.',
+    title: 'Accessible to everyone. Auditable for your regulators.',
     description:
-      'Enterprise accessibility platform for BFSI, PSUs, and government vendors — scan websites and mobile apps, fix barriers for people with disabilities, and produce RPwD, GIGW, IS 17802 & SEBI audit evidence.',
+      'WCAG 2.2 AA accessibility platform for global teams — scan websites and mobile apps, fix barriers for people with disabilities, and produce audit-ready evidence. Optional India pack for RPwD, GIGW, IS 17802 & SEBI.',
   },
   hero: {
     urgencyAria: 'Compliance urgency',
-    badges: ['SEBI deadline Apr 2026', 'GIGW 3.0 · Govt portals', 'RPwD Act 2016'],
+    badges: ['WCAG 2.2 AA global', 'Optional India pack', 'Audit-ready PDFs'],
     titleLine1: 'Accessible to',
-    titleHighlight: 'all Indians',
+    titleHighlight: 'everyone',
     titleLine2: 'Auditable for your regulators.',
     subtitle:
-      "India's platform for BFSI, PSUs, and government vendors — scan websites and mobile apps, remove barriers for people with disabilities, and produce RPwD, GIGW, IS 17802 & SEBI evidence your audit file demands.",
+      'WCAG-first accessibility for global teams — scan websites and mobile apps, remove barriers for people with disabilities, and export evidence your audit file demands. Add an India pack when you need RPwD, GIGW, IS 17802, or SEBI.',
     sectorsAria: 'Who we serve',
-    sectors: ['BFSI & listed cos.', 'PSUs & ministries', 'Govt vendors', 'Audit-ready reports'],
+    sectors: ['Global SaaS & e-com', 'BFSI & listed cos.', 'Govt & vendors', 'Audit-ready reports'],
     trustPoints: [
-      'WCAG 2.2 AA + IS 17802 scans for websites & mobile apps',
-      'Audit-ready PDFs for SEBI, RPwD, GIGW & tender committees',
+      'WCAG 2.2 AA scans for websites & mobile apps',
+      'Optional India pack: SEBI, RPwD, GIGW & IS 17802',
       'Remediation, widget, monitoring & IAAP sign-off pathways',
     ],
     bookDemo: 'Book enterprise demo',
     runScan: 'Run free scan',
-    footnote: 'GST invoicing · PO & annual contracts for government · No credit card for free scan',
+    footnote: 'INR or USD billing · GST invoices in India · No credit card for free scan',
     standardsAria: 'Supported compliance standards',
-    standards: ['RPwD Act 2016', 'IS 17802', 'WCAG 2.2 AA', 'GIGW 3.0', 'SEBI 2024'],
+    standards: ['WCAG 2.2 AA', 'RPwD Act 2016', 'IS 17802', 'GIGW 3.0', 'SEBI 2024'],
     reportCard: {
       title: 'Enterprise compliance report',
       auditFile: 'Audit file',
@@ -33,8 +33,8 @@ export const home: HomeDict = {
       scoreMeta: '25 barriers · 12 pages scanned',
       exportsTitle: 'Regulator-ready exports',
       exports: [
-        { label: 'RPwD evidence pack', status: 'Ready' },
-        { label: 'GIGW 3.0 summary', status: 'Ready' },
+        { label: 'WCAG 2.2 AA report', status: 'Ready' },
+        { label: 'India pack (optional)', status: 'Ready' },
         { label: 'SEBI assessment', status: 'In review' },
       ],
       download: 'Download PDF for audit committee',
@@ -43,38 +43,38 @@ export const home: HomeDict = {
       scanComplete: 'Scan complete',
       scanTime: '68 seconds',
       figcaption:
-        'Enterprise team in India reviewing digital accessibility, with a sample compliance report showing accessibility score and regulator-ready exports.',
+        'Enterprise team reviewing digital accessibility, with a sample compliance report showing accessibility score and regulator-ready exports.',
       imageAlt:
-        'Diverse Indian professionals in an enterprise office using laptops and assistive technology to access digital services',
+        'Diverse professionals in an enterprise office using laptops and assistive technology to access digital services',
     },
   },
   ticker: {
-    aria: 'Sectors we serve across India',
+    aria: 'Sectors and standards we support',
     sectors: [
+      'Global product & SaaS teams',
       'BFSI & listed companies',
-      'PSUs & central ministries',
-      'State govt portals',
-      'SEBI-regulated entities',
-      'Government ICT vendors',
-      'Healthcare & insurance',
       'E-commerce & fintech',
+      'Healthcare & insurance',
+      'Government ICT vendors',
+      'SEBI-regulated entities',
+      'PSUs & ministries',
       'Public sector banks',
     ],
     items: [
-      'SEBI: All regulated entities must meet WCAG 2.1 AA by April 2026',
-      'GIGW 3.0: Government websites must comply with IS 17802',
-      'RPwD Act 2016: Digital services must be accessible to persons with disabilities',
-      "IS 17802: India's national ICT accessibility standard (BIS 2021)",
+      'WCAG 2.2 AA: The global baseline for web accessibility',
+      'SEBI: Regulated entities in India must meet WCAG 2.1 AA by April 2026',
+      'EAA / EN 301 549: European accessibility requirements for many digital products',
+      'RPwD & GIGW: India pack available when you need local evidence',
     ],
   },
   riskStats: {
-    title: 'Accessibility in India — by the numbers',
-    intro: 'The web was built to be universal. Too many Indian sites still leave people out.',
+    title: 'Accessibility — by the numbers',
+    intro: 'The web was built to be universal. Too many sites still leave people out.',
     stats: [
-      { value: '2.68 Cr+', label: 'Indians with visual disability (Census 2011)' },
+      { value: '1.3B+', label: 'People with disabilities worldwide (WHO)' },
       { value: '70M+', label: 'People with disabilities in India' },
-      { value: '21', label: 'Disability types recognised under RPwD Act' },
-      { value: 'Apr 2026', label: 'SEBI accessibility deadline for listed cos.' },
+      { value: 'WCAG', label: 'Global baseline we scan against by default' },
+      { value: 'Apr 2026', label: 'SEBI accessibility deadline (India listed cos.)' },
     ],
   },
   whoWeBuildFor: {
@@ -100,15 +100,14 @@ export const home: HomeDict = {
       {
         title: 'Motor & cognitive disabilities',
         barrier: 'Tiny buttons, keyboard traps, confusing forms',
-        checks: 'WCAG 2.1 keyboard access, 2.5.8 touch targets, IS 17802',
+        checks: 'WCAG 2.1 keyboard access, 2.5.8 touch targets',
       },
     ],
     barrierLabel: 'Common barrier:',
     checksLabel: 'What we check:',
     footer:
-      'Fix these barriers and you welcome crores of Indians who rely on screen readers, magnifiers, voice control, and other assistive technology every day — with the scans and reports regulators expect under RPwD, IS 17802, GIGW, and SEBI.',
-    figcaption:
-      'People with disabilities using assistive technology to access digital services in India',
+      'Fix these barriers and you welcome people who rely on screen readers, magnifiers, voice control, and other assistive technology every day — with WCAG scans by default and optional India regulatory packs when you need them.',
+    figcaption: 'People with disabilities using assistive technology to access digital services',
   },
   howItWorks: {
     title: 'From barriers to welcome — in 4 steps',
@@ -277,7 +276,7 @@ export const home: HomeDict = {
         title: 'From first scan to audit-ready evidence, in one dashboard.',
         body: 'AccessibleNow scans your sites and apps, explains every issue in plain language, suggests AI fixes, and exports the reports your auditors and regulators ask for.',
         stat: '4',
-        statLabel: 'Indian rules in every report: RPwD, SEBI, GIGW and IS 17802',
+        statLabel: 'WCAG by default · India pack (RPwD, SEBI, GIGW, IS 17802) optional',
         imageAlt:
           'Indian compliance team in a boardroom reviewing an accessibility score dashboard on a wall screen',
         cta: 'Book an enterprise demo',
@@ -295,7 +294,7 @@ export const home: HomeDict = {
   simulator: {
     title: "Your website, through your customers' eyes",
     subtitle:
-      'Over 2.6 crore Indians live with a disability. Pick a view to see what a typical payment screen looks like to them.',
+      'Over a billion people worldwide live with a disability. Pick a view to see what a typical payment screen looks like to them.',
     groupAria: 'Choose a simulation',
     previewTitle: 'Pay your credit card bill',
     previewAmount: 'Amount due by 15/10/2026: ₹12,450',
@@ -339,7 +338,8 @@ export const home: HomeDict = {
       'Range uses 2.21% (Census 2011) to 16% (WHO) of visitors with a disability and an assumed 2% conversion rate.',
     legalLabel: 'Legal exposure under RPwD Act 2016, Section 89',
     legalValue: 'Up to ₹5,00,000 per repeat violation',
-    legalNote: 'Plus SEBI action for regulated entities and disqualification from government tenders.',
+    legalNote:
+      'Plus SEBI action for regulated entities and disqualification from government tenders.',
     cta: "Find out exactly what's broken",
   },
   quiz: {
@@ -348,8 +348,14 @@ export const home: HomeDict = {
     yes: 'Yes',
     no: 'No',
     questions: [
-      { id: 'sebi', question: 'Is your organisation regulated by SEBI (listed company, broker, AMC, RIA)?' },
-      { id: 'government', question: 'Are you a government body, PSU, or a vendor building for government?' },
+      {
+        id: 'sebi',
+        question: 'Is your organisation regulated by SEBI (listed company, broker, AMC, RIA)?',
+      },
+      {
+        id: 'government',
+        question: 'Are you a government body, PSU, or a vendor building for government?',
+      },
       { id: 'public', question: 'Do customers or citizens use your website or app?' },
     ],
     resultTitle: 'Rules that apply to you',

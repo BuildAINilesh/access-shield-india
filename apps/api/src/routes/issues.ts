@@ -3,7 +3,14 @@
  */
 
 import type { Database } from '@accessshield/db';
-import { assets, issues, lookupUserByAuthId, users, violations } from '@accessshield/db';
+import {
+  assets,
+  issues,
+  lookupUserByAuthId,
+  priorityConfigs,
+  users,
+  violations,
+} from '@accessshield/db';
 import type { ApiResponse, PaginationMeta } from '@accessshield/types';
 import { and, count, desc, eq, gte, ilike, isNull, lte, or, sql } from 'drizzle-orm';
 import type { NextFunction, Request, Response, Router as ExpressRouter } from 'express';
@@ -13,6 +20,7 @@ import { sendProblem } from '../lib/problem-details';
 import { requireRoles } from '../middleware/rbac';
 import { generateIssueAiAltText, generateIssueAiFix } from '../services/ai-enrichment';
 import { isDevPreviewAiFix, stripDevPreviewComment } from '../lib/dev-mock-ai';
+import { scoreViolation } from '../services/priority-score';
 
 const listIssuesSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
@@ -25,6 +33,8 @@ const listIssuesSchema = z.object({
   wcagCriterion: z.string().optional(),
   dateFrom: z.string().optional(),
   dateTo: z.string().optional(),
+  /** newest = createdAt desc (default); priority = AN-F007 risk score desc */
+  sort: z.enum(['newest', 'priority']).optional().default('newest'),
 });
 
 const patchIssueSchema = z.object({
@@ -121,6 +131,7 @@ export function createIssuesRouter(db: Database): ExpressRouter {
           wcagCriterion,
           dateFrom,
           dateTo,
+          sort,
         } = parseResult.data;
 
         const conditions = [eq(issues.organisationId, orgId)];
@@ -174,14 +185,32 @@ export function createIssuesRouter(db: Database): ExpressRouter {
           );
         }
 
-        const offset = (page - 1) * limit;
-
         const [totalRow] = await db
           .select({ count: count() })
           .from(issues)
           .where(and(...conditions));
 
         const total = totalRow?.count ?? 0;
+
+        const [config] = await db
+          .select()
+          .from(priorityConfigs)
+          .where(eq(priorityConfigs.organisationId, orgId))
+          .limit(1);
+
+        const weights = config
+          ? {
+              userImpact: config.userImpactWeight,
+              regulatoryWeight: config.regulatoryWeight,
+              atCoverage: config.atCoverageWeight,
+              inverseFixComplexity: config.fixComplexityWeight,
+            }
+          : null;
+
+        /** When sorting by priority, score a bounded window then paginate in memory. */
+        const priorityWindow = Math.min(Math.max(total, limit), 500);
+        const fetchLimit = sort === 'priority' ? priorityWindow : limit;
+        const fetchOffset = sort === 'priority' ? 0 : (page - 1) * limit;
 
         const rows = await db
           .select({
@@ -218,59 +247,84 @@ export function createIssuesRouter(db: Database): ExpressRouter {
           .leftJoin(violations, eq(issues.violationId, violations.id))
           .where(and(...conditions))
           .orderBy(desc(issues.createdAt))
-          .limit(limit)
-          .offset(offset);
+          .limit(fetchLimit)
+          .offset(fetchOffset);
 
-        const data = rows.map((row) => ({
-          id: row.id,
-          organisationId: row.organisationId,
-          violationId: row.violationId,
-          assetId: row.assetId,
-          assignedTo: row.assignedTo,
-          title: row.title,
-          description: row.description,
-          status: row.status,
-          severity: row.severity,
-          dueDate: row.dueDate,
-          resolvedAt: row.resolvedAt,
-          resolvedBy: row.resolvedBy,
-          createdAt: row.createdAt,
-          updatedAt: row.updatedAt,
-          asset: row.assetName
-            ? { id: row.assetId, name: row.assetName, url: row.assetUrl ?? '' }
-            : undefined,
-          assignee: row.assignedTo
-            ? {
-                id: row.assignedTo,
-                fullName: row.assigneeName,
-                email: row.assigneeEmail ?? '',
-                role: 'developer' as const,
-              }
-            : null,
-          violation: row.violationId
-            ? {
-                id: row.violationId,
-                scanId: '',
-                ruleId: row.violationRuleId ?? '',
-                impact: row.severity,
-                description: row.violationDescription ?? row.description ?? '',
-                helpUrl: row.violationHelpUrl,
-                wcagCriteria: row.violationWcag,
-                selector: row.violationSelector,
-                html: row.violationHtml,
-                pageUrl: row.violationPageUrl,
-                standard: row.violationStandard,
-                createdAt: row.createdAt,
-                issueId: row.id,
-              }
-            : undefined,
-        }));
+        let data = rows.map((row) => {
+          const scored = scoreViolation(
+            {
+              id: row.violationId ?? row.id,
+              ruleId: row.violationRuleId ?? 'unknown',
+              impact: row.severity,
+              standard: row.violationStandard,
+              description: row.violationDescription ?? row.description,
+              pageUrl: row.violationPageUrl,
+            },
+            weights,
+          );
+
+          return {
+            id: row.id,
+            organisationId: row.organisationId,
+            violationId: row.violationId,
+            assetId: row.assetId,
+            assignedTo: row.assignedTo,
+            title: row.title,
+            description: row.description,
+            status: row.status,
+            severity: row.severity,
+            dueDate: row.dueDate,
+            resolvedAt: row.resolvedAt,
+            resolvedBy: row.resolvedBy,
+            createdAt: row.createdAt,
+            updatedAt: row.updatedAt,
+            priorityScore: scored.priorityScore,
+            estimatedFixHours: scored.estimatedFixHours,
+            scoreExplanation: scored.scoreExplanation,
+            asset: row.assetName
+              ? { id: row.assetId, name: row.assetName, url: row.assetUrl ?? '' }
+              : undefined,
+            assignee: row.assignedTo
+              ? {
+                  id: row.assignedTo,
+                  fullName: row.assigneeName,
+                  email: row.assigneeEmail ?? '',
+                  role: 'developer' as const,
+                }
+              : null,
+            violation: row.violationId
+              ? {
+                  id: row.violationId,
+                  scanId: '',
+                  ruleId: row.violationRuleId ?? '',
+                  impact: row.severity,
+                  description: row.violationDescription ?? row.description ?? '',
+                  helpUrl: row.violationHelpUrl,
+                  wcagCriteria: row.violationWcag,
+                  selector: row.violationSelector,
+                  html: row.violationHtml,
+                  pageUrl: row.violationPageUrl,
+                  standard: row.violationStandard,
+                  createdAt: row.createdAt,
+                  issueId: row.id,
+                }
+              : undefined,
+          };
+        });
+
+        if (sort === 'priority') {
+          data = data
+            .sort((a, b) => b.priorityScore - a.priorityScore)
+            .slice((page - 1) * limit, page * limit);
+        }
 
         const meta: PaginationMeta = {
           page,
           pageSize: limit,
-          total,
-          totalPages: Math.ceil(total / limit),
+          total: sort === 'priority' ? Math.min(total, priorityWindow) : total,
+          totalPages: Math.ceil(
+            (sort === 'priority' ? Math.min(total, priorityWindow) : total) / limit,
+          ),
         };
 
         const response: ApiResponse<typeof data> = {

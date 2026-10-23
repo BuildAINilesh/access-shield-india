@@ -17,9 +17,14 @@ import { logger } from '../lib/logger';
 import { sendProblem } from '../lib/problem-details';
 import { requireRoles } from '../middleware/rbac';
 import fs from 'fs/promises';
-import { fetchReportData, formatIndianDate, InvalidStateError, NotFoundError } from './data-fetcher';
+import {
+  fetchReportData,
+  formatIndianDate,
+  InvalidStateError,
+  NotFoundError,
+} from './data-fetcher';
 import { generateAndStoreReport } from './generate-report';
-import { generatePdf, generatePdfWithTitle } from './pdf-generator';
+import { generatePdfWithTitle } from './pdf-generator';
 import { createZipArchive, sanitizeZipFileName } from './zip-bundle';
 import {
   getReportDownloadUrl,
@@ -28,7 +33,10 @@ import {
   uploadReportToS3,
   resolveLocalReportPath,
 } from './s3-upload';
-import { renderAccessibilityStatementTemplate, DEFAULT_GRIEVANCE_OFFICER } from './templates/accessibility-statement';
+import {
+  renderAccessibilityStatementTemplate,
+  DEFAULT_GRIEVANCE_OFFICER,
+} from './templates/accessibility-statement';
 import { renderExecutiveTemplate } from './templates/executive';
 import { renderLegalRpwdTemplate } from './templates/legal-rpwd';
 import { renderSebiTemplate } from './templates/sebi';
@@ -600,7 +608,7 @@ export function createReportingRouter(db: Database, redis: Redis): ExpressRouter
           return;
         }
 
-        const { page, limit, asset_id, type } = parseResult.data;
+        const { page, limit, asset_id, type: _type } = parseResult.data;
         const orgId = req.user!.org_id;
         const offset = (page - 1) * limit;
 

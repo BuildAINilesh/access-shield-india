@@ -1,12 +1,5 @@
 import type { Metadata } from 'next';
-import {
-  FileCheck,
-  UserCheck,
-  GraduationCap,
-  FileText,
-  TestTube,
-  Languages,
-} from 'lucide-react';
+import { FileCheck, UserCheck, GraduationCap, FileText, TestTube, Languages } from 'lucide-react';
 import { LocaleLink } from '@/components/common/LocaleLink';
 import { ButtonLink } from '@/components/marketing/ButtonLink';
 import { ComplianceStrip } from '@/components/marketing/ComplianceStrip';
@@ -44,11 +37,7 @@ const SERVICE_ICONS = {
   multilingual: Languages,
 } as const;
 
-export default async function ServicesHubPage({
-  params,
-}: {
-  params: Promise<{ locale: Locale }>;
-}) {
+export default async function ServicesHubPage({ params }: { params: Promise<{ locale: Locale }> }) {
   const { locale } = await params;
   const dict = getDictionary(locale);
   const { servicesHub } = dict.pages;
@@ -88,12 +77,7 @@ export default async function ServicesHubPage({
             {servicesHub.hero.subtitle}
           </p>
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <ButtonLink
-              href="/scan"
-              size="lg"
-              variant="primary"
-              className="min-w-[240px]"
-            >
+            <ButtonLink href="/scan" size="lg" variant="primary" className="min-w-[240px]">
               {servicesHub.hero.primaryCta}
             </ButtonLink>
             <ButtonLink
@@ -133,9 +117,7 @@ export default async function ServicesHubPage({
                     >
                       <Icon className="h-6 w-6" />
                     </div>
-                    <h3 className="mt-4 text-xl font-semibold text-text-primary">
-                      {name}
-                    </h3>
+                    <h3 className="mt-4 text-xl font-semibold text-text-primary">{name}</h3>
                     <p className="mt-2 text-base leading-normal text-text-secondary">
                       {description}
                     </p>
@@ -157,10 +139,7 @@ export default async function ServicesHubPage({
         className="border-b border-gray-200 bg-bg-secondary px-4 py-16 sm:px-6 lg:px-8"
       >
         <div className="mx-auto max-w-7xl">
-          <h2
-            id="why-india-heading"
-            className="text-center text-3xl font-bold text-text-primary"
-          >
+          <h2 id="why-india-heading" className="text-center text-3xl font-bold text-text-primary">
             {servicesHub.whyIndia.title}
           </h2>
           <div className="mt-12 grid gap-8 sm:grid-cols-3">
@@ -171,9 +150,7 @@ export default async function ServicesHubPage({
                 className="flex flex-col items-center rounded-xl border border-border bg-white p-8 text-center transition-all hover:border-primary-600 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
               >
                 <p className="text-4xl font-bold text-primary-600">{value}</p>
-                <p className="mt-3 text-base leading-normal text-text-secondary">
-                  {label}
-                </p>
+                <p className="mt-3 text-base leading-normal text-text-secondary">{label}</p>
               </LocaleLink>
             ))}
           </div>
