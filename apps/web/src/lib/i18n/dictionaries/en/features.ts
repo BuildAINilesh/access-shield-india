@@ -120,17 +120,19 @@ export const features: FeaturesDict = {
       tagline: 'GitHub, Jira, Slack, Figma, webhooks',
       snykParallel: 'Integrations ecosystem',
       summary:
-        'Bring accessibility into tools teams already use. Jira sync is live in the portal; Slack digests, webhooks, Figma contrast checks, and deeper GitHub PR Gate expand next.',
+        'Bring accessibility into tools teams already use — Jira, Slack Incoming Webhook digests, signed outbound webhooks, GitHub App Apply-fix, and a Figma contrast plugin you import in Desktop.',
       userStories: [
         'Auto-create Jira tickets from violations.',
-        'Get daily Slack digests and regression alerts.',
+        'Get daily Slack digests and scan-completed alerts.',
         'Check colour contrast in Figma before hand-off.',
+        'Commit AI fixes to a repo via the GitHub App.',
       ],
       capabilities: [
-        'Jira OAuth connect + issue sync (available)',
-        'Slack digests and slash commands (coming)',
-        'Webhook API with signed deliveries (coming)',
-        'Figma contrast plugin (coming)',
+        'Jira OAuth connect + issue sync',
+        'Slack Incoming Webhook digests (digest.daily)',
+        'HMAC-signed outbound webhooks',
+        'GitHub App install + Contents API Apply-fix',
+        'Figma contrast plugin (local Development import)',
       ],
     },
     dynamic: {

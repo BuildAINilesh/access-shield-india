@@ -1,10 +1,10 @@
 /**
- * AN Fix API — generate / history / apply stubs (AN-F005).
+ * AN Fix API — generate / history / apply via GitHub App (AN-F005).
  */
 
 import type { Database } from '@accessshield/db';
-import { fixApplications, fixSuggestions, organisations } from '@accessshield/db';
-import { and, desc, eq } from 'drizzle-orm';
+import { fixSuggestions, organisations } from '@accessshield/db';
+import { desc, eq } from 'drizzle-orm';
 import {
   Router,
   type NextFunction,
@@ -17,6 +17,7 @@ import type { ApiResponse } from '@accessshield/types';
 import { sendProblem } from '../lib/problem-details';
 import { requireRoles } from '../middleware/rbac';
 import { generateCodeFix } from '../services/code-fix';
+import { applyFixToGitHub } from '../services/github-apply';
 
 const generateSchema = z.object({
   code: z.string().min(1).max(50_000),
@@ -29,9 +30,12 @@ const generateSchema = z.object({
 
 const applySchema = z.object({
   fixId: z.string().uuid(),
-  repoFullName: z.string().min(3).max(255).optional(),
+  repoFullName: z.string().min(3).max(255),
+  filePath: z.string().min(1).max(500),
+  branch: z.string().min(1).max(255).optional(),
   prNumber: z.number().int().positive().optional(),
-  filePath: z.string().max(500).optional(),
+  /** Reviewed markup from the portal — preferred over re-running generate */
+  content: z.string().min(1).max(50_000).optional(),
 });
 
 export function createFixesRouter(db: Database): ExpressRouter {
@@ -143,40 +147,41 @@ export function createFixesRouter(db: Database): ExpressRouter {
         }
 
         const orgId = req.user!.org_id;
-        const [fix] = await db
-          .select()
-          .from(fixSuggestions)
-          .where(
-            and(eq(fixSuggestions.id, parsed.data.fixId), eq(fixSuggestions.organisationId, orgId)),
-          )
-          .limit(1);
+        const userId = req.user!.sub;
 
-        if (!fix) {
-          sendProblem(res, 404, 'not-found', 'Fix suggestion not found');
-          return;
+        try {
+          const result = await applyFixToGitHub(db, {
+            orgId,
+            userId,
+            fixId: parsed.data.fixId,
+            repoFullName: parsed.data.repoFullName,
+            filePath: parsed.data.filePath,
+            branch: parsed.data.branch,
+            prNumber: parsed.data.prNumber,
+            contentOverride: parsed.data.content,
+          });
+
+          const response: ApiResponse<typeof result> = {
+            data: result,
+            timestamp: new Date().toISOString(),
+          };
+          res.json(response);
+        } catch (err) {
+          const status =
+            typeof err === 'object' && err && 'status' in err
+              ? Number((err as { status: number }).status)
+              : 500;
+          const code =
+            typeof err === 'object' && err && 'code' in err
+              ? String((err as { code: string }).code)
+              : 'internal-error';
+          const message = err instanceof Error ? err.message : 'Failed to apply fix';
+          if (status >= 400 && status < 600) {
+            sendProblem(res, status, code, message);
+            return;
+          }
+          throw err;
         }
-
-        // GitHub Contents API apply lands with PR Gate (AN-F010). Record intent for audit.
-        const [application] = await db
-          .insert(fixApplications)
-          .values({
-            organisationId: orgId,
-            fixId: fix.id,
-            repo: parsed.data.repoFullName ?? null,
-            prNumber: parsed.data.prNumber ?? null,
-            filePath: parsed.data.filePath ?? null,
-            commitSha: null,
-          })
-          .returning({ id: fixApplications.id });
-
-        sendProblem(
-          res,
-          501,
-          'not-implemented',
-          'PR Apply fix via GitHub API is not enabled yet. Fix was recorded; copy fixedCode from /fixes/generate meanwhile.',
-          undefined,
-          { applicationId: application?.id, fixId: fix.id },
-        );
       } catch (err) {
         next(err);
       }

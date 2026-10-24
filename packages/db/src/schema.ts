@@ -913,6 +913,32 @@ export const webhookDeliveriesRelations = relations(webhookDeliveries, ({ one })
   }),
 }));
 
+/** GitHub App installation bound to an organisation (AN-F005 Apply-fix) */
+export const githubInstallations = pgTable(
+  'github_installations',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    organisationId: orgId(),
+    installationId: bigint('installation_id', { mode: 'number' }).notNull(),
+    accountLogin: varchar('account_login', { length: 255 }).notNull(),
+    accountType: varchar('account_type', { length: 32 }).notNull().default('Organization'),
+    ...timestamps,
+    deletedAt: timestamp('deleted_at', { withTimezone: true, mode: 'string' }),
+  },
+  (table) => ({
+    // Partial unique (active rows only) is defined in migration 0014 SQL.
+    orgIdx: index('github_installations_org_idx').on(table.organisationId),
+    installationIdx: index('github_installations_installation_idx').on(table.installationId),
+  }),
+);
+
+export const githubInstallationsRelations = relations(githubInstallations, ({ one }) => ({
+  organisation: one(organisations, {
+    fields: [githubInstallations.organisationId],
+    references: [organisations.id],
+  }),
+}));
+
 // ─── AN OSS / Intelligence (AN-F002 / AN-F004) ───────────────────────────────
 
 /** Curated accessibility issues in npm packages */

@@ -36,9 +36,9 @@ export interface FeatureMeta {
 export const FEATURE_CATALOG: readonly FeatureMeta[] = [
   { id: 'AN-F001', slug: 'code', phase: 1, status: 'in_progress' },
   { id: 'AN-F002', slug: 'open-source', phase: 1, status: 'available' },
-  { id: 'AN-F005', slug: 'fix', phase: 1, status: 'in_progress' },
+  { id: 'AN-F005', slug: 'fix', phase: 1, status: 'available' },
   { id: 'AN-F007', slug: 'priority-score', phase: 1, status: 'available' },
-  { id: 'AN-F010', slug: 'integrations', phase: 1, status: 'in_progress' },
+  { id: 'AN-F010', slug: 'integrations', phase: 1, status: 'available' },
   { id: 'AN-F003', slug: 'dynamic', phase: 2, status: 'coming_soon' },
   { id: 'AN-F004', slug: 'intelligence', phase: 2, status: 'coming_soon' },
   { id: 'AN-F006', slug: 'learn', phase: 2, status: 'coming_soon' },

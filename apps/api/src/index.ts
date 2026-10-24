@@ -38,6 +38,7 @@ import { createPublicSignupRouter } from './routes/public-signup';
 import { createAdminRouter } from './routes/admin';
 import { createDocumentScansRouter } from './routes/document-scans';
 import { createRealtimeRouter } from './routes/realtime';
+import { startSlackDigestJob } from './jobs/slack-digest';
 import { startWidgetAnalyticsRollupJob } from './jobs/widget-analytics-rollup';
 
 const PORT = Number(process.env.PORT ?? 4000);
@@ -205,6 +206,7 @@ async function bootstrap() {
   await redis.connect();
 
   const stopAnalyticsRollup = startWidgetAnalyticsRollupJob(db, redis);
+  const stopSlackDigest = startSlackDigestJob(db, redis);
 
   const server = app.listen(PORT, () => {
     logger.info({ port: PORT, version: process.env.npm_package_version }, 'API server started');
@@ -226,6 +228,7 @@ async function bootstrap() {
     logger.info('Shutting down gracefully...');
     server.close();
     stopAnalyticsRollup();
+    stopSlackDigest();
     await redis.quit();
     await closeRabbitMQ();
     logger.info('Shutdown complete');

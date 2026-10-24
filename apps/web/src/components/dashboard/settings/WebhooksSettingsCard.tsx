@@ -14,6 +14,11 @@ const WEBHOOK_EVENT_OPTIONS = [
     description: 'Fired when a website or document scan finishes',
   },
   {
+    value: 'digest.daily',
+    label: 'Daily digest',
+    description: 'Once per day: open issue counts + top risks (Slack Incoming Webhook friendly)',
+  },
+  {
     value: 'violation.introduced',
     label: 'New violation',
     description: 'Fired when a new accessibility violation is introduced',
@@ -193,7 +198,7 @@ export function WebhooksSettingsCard() {
   }
 
   return (
-    <div className="space-y-6">
+    <div id="outbound-webhooks" className="space-y-6 scroll-mt-6">
       <div className="rounded-lg border border-border bg-white p-6">
         <div className="flex items-start gap-4">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary-100">

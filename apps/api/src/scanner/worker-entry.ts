@@ -36,6 +36,7 @@ import {
   startReportGenerateWorker,
 } from './v2/report-generate-worker';
 
+import { startSlackDigestJob } from '../jobs/slack-digest';
 import { startWidgetAnalyticsRollupJob } from '../jobs/widget-analytics-rollup';
 import { createDb } from '@accessshield/db';
 import Redis from 'ioredis';
@@ -43,9 +44,11 @@ import Redis from 'ioredis';
 logger.info('Starting AccessShield scan worker...');
 
 let stopAnalyticsRollup: (() => void) | null = null;
+let stopSlackDigest: (() => void) | null = null;
 
 const gracefulShutdown = async () => {
   stopAnalyticsRollup?.();
+  stopSlackDigest?.();
   if (isScanPipelineV2Enabled()) {
     await shutdownCrawlerWorker();
     await shutdownPageScanWorker();
@@ -70,6 +73,7 @@ async function main(): Promise<void> {
     const redis = new Redis(redisUrl, { maxRetriesPerRequest: 3, lazyConnect: true });
     await redis.connect();
     stopAnalyticsRollup = startWidgetAnalyticsRollupJob(db, redis);
+    stopSlackDigest = startSlackDigestJob(db, redis);
   }
 
   if (isScanPipelineV2Enabled()) {
