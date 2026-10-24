@@ -10,6 +10,7 @@ import { assets, organisations, scans, users, violations } from '@accessshield/d
 import { and, desc, eq, sql } from 'drizzle-orm';
 import { logger } from '../lib/logger';
 import { isDevPreviewAiFix, stripDevPreviewComment } from '../lib/dev-mock-ai';
+import { formatReportOrgName } from './report-org-name';
 import type { ReportTemplateData, ReportType, ScanTrendPoint, ViolationSummary } from './types';
 
 /** Custom error for resource not found scenarios */
@@ -294,13 +295,13 @@ export async function fetchReportData(
     GIGW3: 'GIGW 3.0',
     SEBI: 'SEBI Circular 2024',
   };
-  const standardCodes =
-    scan.standards && scan.standards.length > 0 ? scan.standards : ['WCAG22', 'IS17802'];
+  const standardCodes = scan.standards && scan.standards.length > 0 ? scan.standards : ['WCAG22'];
   const standards = standardCodes.map((code) => STANDARD_LABELS[code] ?? code);
 
   const reportData: ReportTemplateData = {
     organisation: {
-      name: org.name,
+      // Internal/seed orgs (e.g. AccessShield Test Org) print as AccessibleNow
+      name: formatReportOrgName(org.name),
       logoUrl: null,
       gstin: org.gstin,
     },

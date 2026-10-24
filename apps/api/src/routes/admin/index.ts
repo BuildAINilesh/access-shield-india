@@ -5,7 +5,7 @@
 import type { Database } from '@accessshield/db';
 import { organisations, scans, users, widgetPreferences } from '@accessshield/db';
 import type { ApiResponse, PaginationMeta } from '@accessshield/types';
-import { and, count, desc, eq, gte, ilike, isNull, or } from 'drizzle-orm';
+import { count, desc, eq, gte, ilike, or } from 'drizzle-orm';
 import type { NextFunction, Request, Response, Router as ExpressRouter } from 'express';
 import { Router } from 'express';
 import type { Redis } from 'ioredis';
@@ -25,11 +25,7 @@ import { requireRoles } from '../../middleware/rbac';
 import { createIdentityAdmin } from '../../services/identity-admin';
 import { provisionOrgUser } from '../../services/user-provisioning';
 import type { AppSecrets } from '../../config/secrets';
-import {
-  buildWidgetAnalyticsSummary,
-  daysAgoUtc,
-  utcDateString,
-} from '../../lib/widget-analytics';
+import { buildWidgetAnalyticsSummary, daysAgoUtc, utcDateString } from '../../lib/widget-analytics';
 
 const PLAN_TIERS = [
   'trial',

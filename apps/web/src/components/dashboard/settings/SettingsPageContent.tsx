@@ -6,7 +6,8 @@ import { Tabs, type TabItem } from '@accessshield/ui';
 import { LoadingState } from '@/components/dashboard/common/LoadingState';
 import { OrgSettingsForm } from '@/components/dashboard/settings/OrgSettingsForm';
 import { UserTable } from '@/components/dashboard/settings/UserTable';
-import { JiraIntegrationCard } from '@/components/dashboard/settings/JiraIntegrationCard';
+import { IntegrationsSettings } from '@/components/dashboard/settings/IntegrationsSettings';
+import { PriorityConfigForm } from '@/components/dashboard/settings/PriorityConfigForm';
 import { BillingCard } from '@/components/dashboard/settings/BillingCard';
 import { NotificationSettings } from '@/components/dashboard/settings/NotificationSettings';
 import { WidgetSettings } from '@/components/dashboard/settings/WidgetSettings';
@@ -38,13 +39,24 @@ const SETTINGS_TABS: TabItem[] = [
     ),
   },
   {
+    value: 'priority',
+    label: 'Priority Score',
+    content: (
+      <Suspense
+        fallback={<LoadingState message="Please wait, loading priority settings…" variant="card" />}
+      >
+        <PriorityConfigForm />
+      </Suspense>
+    ),
+  },
+  {
     value: 'integrations',
     label: 'Integrations',
     content: (
       <Suspense
         fallback={<LoadingState message="Please wait, loading integrations…" variant="card" />}
       >
-        <JiraIntegrationCard />
+        <IntegrationsSettings />
       </Suspense>
     ),
   },
@@ -85,7 +97,9 @@ const SETTINGS_TABS: TabItem[] = [
     value: 'ai',
     label: 'AI Configuration',
     content: (
-      <Suspense fallback={<LoadingState message="Please wait, loading AI settings…" variant="card" />}>
+      <Suspense
+        fallback={<LoadingState message="Please wait, loading AI settings…" variant="card" />}
+      >
         <AISettingsForm />
       </Suspense>
     ),
@@ -102,9 +116,7 @@ export function SettingsPageContent() {
         </p>
       </div>
 
-      <Suspense
-        fallback={<LoadingState message="Please wait, loading settings…" variant="card" />}
-      >
+      <Suspense fallback={<LoadingState message="Please wait, loading settings…" variant="card" />}>
         <SettingsTabs />
       </Suspense>
     </div>
@@ -119,6 +131,11 @@ function SettingsTabs() {
     : 'organisation';
 
   return (
-    <Tabs items={SETTINGS_TABS} defaultValue={defaultValue} ariaLabel="Settings sections" lazyMount />
+    <Tabs
+      items={SETTINGS_TABS}
+      defaultValue={defaultValue}
+      ariaLabel="Settings sections"
+      lazyMount
+    />
   );
 }

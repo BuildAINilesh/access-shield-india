@@ -94,17 +94,15 @@ export function AssetCard({ asset }: AssetCardProps) {
         </a>
 
         <div className="flex flex-wrap gap-2">
-          {(asset.standards?.length ? asset.standards : (['WCAG22', 'IS17802'] as const)).map(
-            (standard) => {
-              const badge = STANDARD_BADGES[standard];
-              if (!badge) return null;
-              return (
-                <Badge key={standard} variant="secondary" className={badge.className}>
-                  {badge.label}
-                </Badge>
-              );
-            },
-          )}
+          {(asset.standards?.length ? asset.standards : (['WCAG22'] as const)).map((standard) => {
+            const badge = STANDARD_BADGES[standard];
+            if (!badge) return null;
+            return (
+              <Badge key={standard} variant="secondary" className={badge.className}>
+                {badge.label}
+              </Badge>
+            );
+          })}
         </div>
 
         {asset.lastScannedAt && (

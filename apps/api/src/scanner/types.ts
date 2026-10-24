@@ -154,7 +154,7 @@ export const DEFAULT_VIEWPORTS: ViewportConfig[] = [
 export const DEFAULT_SCAN_CONFIG: Partial<ScanJobConfig> = {
   maxPages: 50,
   wcagLevel: 'AA',
-  standards: ['WCAG22', 'IS17802'],
+  standards: ['WCAG22'],
   excludePaths: ['/api/', '/admin/', '/_next/', '/static/'],
   viewports: DEFAULT_VIEWPORTS,
 };

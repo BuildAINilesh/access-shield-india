@@ -515,39 +515,42 @@ export function createPublicWidgetRouter(db: Database, redis: Redis): ExpressRou
    * PUBLIC — batched anonymous usage events. Token-validated.
    * Do not log IP or request body beyond event types.
    */
-  router.post('/analytics', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      let payload: unknown = req.body;
-      if (typeof payload === 'string') {
-        try {
-          payload = JSON.parse(payload) as unknown;
-        } catch {
-          sendProblem(res, 400, 'validation-error', 'Invalid analytics payload');
+  router.post(
+    '/analytics',
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      try {
+        let payload: unknown = req.body;
+        if (typeof payload === 'string') {
+          try {
+            payload = JSON.parse(payload) as unknown;
+          } catch {
+            sendProblem(res, 400, 'validation-error', 'Invalid analytics payload');
+            return;
+          }
+        }
+
+        const parseResult = analyticsBodySchema.safeParse(payload);
+        if (!parseResult.success) {
+          sendProblem(res, 400, 'validation-error', 'Invalid analytics payload', undefined, {
+            errors: parseResult.error.flatten().fieldErrors,
+          });
           return;
         }
-      }
 
-      const parseResult = analyticsBodySchema.safeParse(payload);
-      if (!parseResult.success) {
-        sendProblem(res, 400, 'validation-error', 'Invalid analytics payload', undefined, {
-          errors: parseResult.error.flatten().fieldErrors,
-        });
-        return;
-      }
+        const { token, events } = parseResult.data;
+        const ctx = await resolveTokenContext(redis, db, token);
+        if (!ctx) {
+          sendProblem(res, 401, 'unauthorized', 'Invalid widget token');
+          return;
+        }
 
-      const { token, events } = parseResult.data;
-      const ctx = await resolveTokenContext(redis, db, token);
-      if (!ctx) {
-        sendProblem(res, 401, 'unauthorized', 'Invalid widget token');
-        return;
+        await incrementWidgetStats(redis, ctx.orgId, events);
+        res.status(204).end();
+      } catch (err) {
+        next(err);
       }
-
-      await incrementWidgetStats(redis, ctx.orgId, events);
-      res.status(204).end();
-    } catch (err) {
-      next(err);
-    }
-  });
+    },
+  );
 
   return router;
 }

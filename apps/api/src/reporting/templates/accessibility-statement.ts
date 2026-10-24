@@ -6,6 +6,7 @@
  */
 
 import Handlebars from 'handlebars';
+import { formatReportOrgName } from '../report-org-name';
 import type { ReportTemplateData } from '../types';
 
 /** Grievance officer contact information */
@@ -20,6 +21,28 @@ export interface AccessibilityStatementOptions {
   language: 'en' | 'hi';
   grievanceOfficer: GrievanceOfficer;
 }
+
+/**
+ * Brand display name for Digiaccess / AccessibleNow legal entity in statements.
+ * Keeps other client organisation names unchanged.
+ */
+export function formatStatementOrgName(orgName: string): string {
+  const trimmed = orgName.trim();
+  // Internal/seed orgs (AccessShield Test Org, Public Scans, …) → brand name
+  const reportName = formatReportOrgName(trimmed);
+  if (reportName !== trimmed) return reportName;
+  if (/^digiaccess\s+private\s+limited$/i.test(trimmed)) {
+    return 'AccessibleNow (Digiaccess Private Limited)';
+  }
+  return trimmed;
+}
+
+/** Default grievance contact published on generated accessibility statements */
+export const DEFAULT_GRIEVANCE_OFFICER: GrievanceOfficer = {
+  name: 'AccessibleNow Grievance Officer',
+  email: 'nilesh@accessiblenow.in',
+  phone: '+91-9890451667',
+};
 
 /** Accessibility statement CSS - WCAG 2.2 AA compliant */
 const STATEMENT_CSS = `
@@ -455,11 +478,16 @@ export function renderAccessibilityStatementTemplate(
 
   const limitations = getLimitations(data);
   const hasLimitations = limitations.length > 0;
+  const statementOrgName = formatStatementOrgName(data.organisation.name);
 
   const templateData = {
     ...data,
+    organisation: {
+      ...data.organisation,
+      name: statementOrgName,
+    },
     grievanceOfficer,
-    commitmentText: content.commitment.text(data.organisation.name),
+    commitmentText: content.commitment.text(statementOrgName),
     standardsConformance,
     conformanceLevel: isHindi ? conformanceInfo.levelHi : conformanceInfo.level,
     conformanceLevelClass: conformanceInfo.className,

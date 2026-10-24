@@ -163,7 +163,7 @@ export const assets = pgTable(
     standards: text('standards')
       .array()
       .notNull()
-      .default(['WCAG22', 'IS17802']),
+      .default(['WCAG22']),
     ...timestamps,
   },
   (table) => ({
@@ -196,7 +196,7 @@ export const scans = pgTable(
     standards: text('standards')
       .array()
       .notNull()
-      .default(['WCAG22', 'IS17802']),
+      .default(['WCAG22']),
     ...timestamps,
   },
   (table) => ({
@@ -536,7 +536,7 @@ export const documentScanJobs = pgTable(
     standards: text('standards')
       .array()
       .notNull()
-      .default(['WCAG_2_1_AA', 'GIGW_3_0', 'PDF_UA', 'IS_17802']),
+      .default(['WCAG_2_1_AA', 'PDF_UA']),
     errorMessage: text('error_message'),
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
       .notNull()
@@ -723,5 +723,466 @@ export const widgetAnalyticsDailyRelations = relations(widgetAnalyticsDaily, ({ 
   organisation: one(organisations, {
     fields: [widgetAnalyticsDaily.organisationId],
     references: [organisations.id],
+  }),
+}));
+
+// ─── AN Code / AN Fix (Phase 1) ──────────────────────────────────────────────
+
+/** Cached IDE / snippet analysis results (AN-F001) */
+export const codeDiagnostics = pgTable(
+  'code_diagnostics',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    organisationId: orgId(),
+    sessionId: varchar('session_id', { length: 128 }),
+    fileHash: varchar('file_hash', { length: 64 }).notNull(),
+    filetype: varchar('filetype', { length: 32 }).notNull(),
+    violationsJson: jsonb('violations_json').notNull().$type<unknown[]>(),
+    ...timestamps,
+  },
+  (table) => ({
+    orgIdx: index('code_diagnostics_org_idx').on(table.organisationId),
+    hashIdx: index('code_diagnostics_hash_idx').on(table.fileHash),
+  }),
+);
+
+/** Pre-approved fix patterns for common violation types (AN-F005) */
+export const fixTemplates = pgTable(
+  'fix_templates',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    violationType: varchar('violation_type', { length: 100 }).notNull(),
+    patternRegex: text('pattern_regex'),
+    fixTemplate: text('fix_template').notNull(),
+    explanation: text('explanation').notNull(),
+    confidenceOverride: varchar('confidence_override', { length: 16 })
+      .notNull()
+      .default('high'),
+    ...timestamps,
+  },
+  (table) => ({
+    typeIdx: index('fix_templates_type_idx').on(table.violationType),
+  }),
+);
+
+/** Generated fix suggestions cache (AN-F005) */
+export const fixSuggestions = pgTable(
+  'fix_suggestions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    organisationId: orgId(),
+    violationId: uuid('violation_id'),
+    ruleId: varchar('rule_id', { length: 100 }).notNull(),
+    codeHash: varchar('code_hash', { length: 64 }).notNull(),
+    fixCode: text('fix_code').notNull(),
+    diff: text('diff'),
+    explanation: text('explanation'),
+    confidence: varchar('confidence', { length: 16 }).notNull().default('medium'),
+    modelVersion: varchar('model_version', { length: 100 }),
+    ...timestamps,
+  },
+  (table) => ({
+    orgIdx: index('fix_suggestions_org_idx').on(table.organisationId),
+    hashIdx: index('fix_suggestions_hash_idx').on(table.codeHash),
+  }),
+);
+
+/** Applied fix audit log (AN-F005) */
+export const fixApplications = pgTable(
+  'fix_applications',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    organisationId: orgId(),
+    fixId: uuid('fix_id').references(() => fixSuggestions.id, { onDelete: 'set null' }),
+    repo: varchar('repo', { length: 255 }),
+    prNumber: integer('pr_number'),
+    filePath: text('file_path'),
+    appliedBy: uuid('applied_by'),
+    commitSha: varchar('commit_sha', { length: 64 }),
+    ...timestamps,
+  },
+  (table) => ({
+    orgIdx: index('fix_applications_org_idx').on(table.organisationId),
+  }),
+);
+
+export const codeDiagnosticsRelations = relations(codeDiagnostics, ({ one }) => ({
+  organisation: one(organisations, {
+    fields: [codeDiagnostics.organisationId],
+    references: [organisations.id],
+  }),
+}));
+
+export const fixSuggestionsRelations = relations(fixSuggestions, ({ one }) => ({
+  organisation: one(organisations, {
+    fields: [fixSuggestions.organisationId],
+    references: [organisations.id],
+  }),
+}));
+
+export const fixApplicationsRelations = relations(fixApplications, ({ one }) => ({
+  organisation: one(organisations, {
+    fields: [fixApplications.organisationId],
+    references: [organisations.id],
+  }),
+  suggestion: one(fixSuggestions, {
+    fields: [fixApplications.fixId],
+    references: [fixSuggestions.id],
+  }),
+}));
+
+/** Org-specific priority scoring weights (AN-F007) */
+export const priorityConfigs = pgTable(
+  'priority_configs',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    organisationId: orgId(),
+    userImpactWeight: doublePrecision('user_impact_weight').notNull().default(0.4),
+    regulatoryWeight: doublePrecision('regulatory_weight').notNull().default(0.3),
+    atCoverageWeight: doublePrecision('at_coverage_weight').notNull().default(0.2),
+    fixComplexityWeight: doublePrecision('fix_complexity_weight').notNull().default(0.1),
+    ...timestamps,
+  },
+  (table) => ({
+    orgUnique: uniqueIndex('priority_configs_org_uidx').on(table.organisationId),
+  }),
+);
+
+/** Outbound webhook endpoints (AN-F010) */
+export const orgWebhooks = pgTable(
+  'org_webhooks',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    organisationId: orgId(),
+    url: text('url').notNull(),
+    secret: varchar('secret', { length: 128 }).notNull(),
+    events: text('events').array().notNull(),
+    isActive: boolean('is_active').notNull().default(true),
+    ...timestamps,
+    deletedAt: timestamp('deleted_at', { withTimezone: true, mode: 'string' }),
+  },
+  (table) => ({
+    orgIdx: index('org_webhooks_org_idx').on(table.organisationId),
+  }),
+);
+
+export const webhookDeliveries = pgTable(
+  'webhook_deliveries',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    organisationId: orgId(),
+    webhookId: uuid('webhook_id')
+      .notNull()
+      .references(() => orgWebhooks.id, { onDelete: 'cascade' }),
+    eventType: varchar('event_type', { length: 64 }).notNull(),
+    status: varchar('status', { length: 32 }).notNull().default('pending'),
+    attempts: integer('attempts').notNull().default(0),
+    lastError: text('last_error'),
+    payloadJson: jsonb('payload_json'),
+    ...timestamps,
+  },
+  (table) => ({
+    orgIdx: index('webhook_deliveries_org_idx').on(table.organisationId),
+    webhookIdx: index('webhook_deliveries_webhook_idx').on(table.webhookId),
+  }),
+);
+
+export const priorityConfigsRelations = relations(priorityConfigs, ({ one }) => ({
+  organisation: one(organisations, {
+    fields: [priorityConfigs.organisationId],
+    references: [organisations.id],
+  }),
+}));
+
+export const orgWebhooksRelations = relations(orgWebhooks, ({ one, many }) => ({
+  organisation: one(organisations, {
+    fields: [orgWebhooks.organisationId],
+    references: [organisations.id],
+  }),
+  deliveries: many(webhookDeliveries),
+}));
+
+export const webhookDeliveriesRelations = relations(webhookDeliveries, ({ one }) => ({
+  organisation: one(organisations, {
+    fields: [webhookDeliveries.organisationId],
+    references: [organisations.id],
+  }),
+  webhook: one(orgWebhooks, {
+    fields: [webhookDeliveries.webhookId],
+    references: [orgWebhooks.id],
+  }),
+}));
+
+/** GitHub App installation bound to an organisation (AN-F005 Apply-fix) */
+export const githubInstallations = pgTable(
+  'github_installations',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    organisationId: orgId(),
+    installationId: bigint('installation_id', { mode: 'number' }).notNull(),
+    accountLogin: varchar('account_login', { length: 255 }).notNull(),
+    accountType: varchar('account_type', { length: 32 }).notNull().default('Organization'),
+    ...timestamps,
+    deletedAt: timestamp('deleted_at', { withTimezone: true, mode: 'string' }),
+  },
+  (table) => ({
+    // Partial unique (active rows only) is defined in migration 0014 SQL.
+    orgIdx: index('github_installations_org_idx').on(table.organisationId),
+    installationIdx: index('github_installations_installation_idx').on(table.installationId),
+  }),
+);
+
+export const githubInstallationsRelations = relations(githubInstallations, ({ one }) => ({
+  organisation: one(organisations, {
+    fields: [githubInstallations.organisationId],
+    references: [organisations.id],
+  }),
+}));
+
+// ─── AN OSS / Intelligence (AN-F002 / AN-F004) ───────────────────────────────
+
+/** Curated accessibility issues in npm packages */
+export const a11yPackageIssues = pgTable(
+  'a11y_package_issues',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    anId: varchar('an_id', { length: 32 }).notNull(),
+    packageName: varchar('package_name', { length: 255 }).notNull(),
+    title: text('title').notNull(),
+    issueType: varchar('issue_type', { length: 64 }).notNull(),
+    severity: varchar('severity', { length: 16 }).notNull(),
+    atAffected: text('at_affected').array(),
+    description: text('description').notNull(),
+    fixStatus: varchar('fix_status', { length: 32 }).notNull().default('open'),
+    workaround: text('workaround'),
+    ...timestamps,
+  },
+  (table) => ({
+    anIdUnique: uniqueIndex('a11y_package_issues_an_id_uidx').on(table.anId),
+    packageIdx: index('a11y_package_issues_package_idx').on(table.packageName),
+  }),
+);
+
+/** Semver ranges affected by a package issue */
+export const a11yPackageVersions = pgTable(
+  'a11y_package_versions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    issueId: uuid('issue_id')
+      .notNull()
+      .references(() => a11yPackageIssues.id, { onDelete: 'cascade' }),
+    versionRange: varchar('version_range', { length: 128 }).notNull(),
+    fixedInVersion: varchar('fixed_in_version', { length: 64 }),
+    ...timestamps,
+  },
+  (table) => ({
+    issueIdx: index('a11y_package_versions_issue_idx').on(table.issueId),
+  }),
+);
+
+/** Community submissions awaiting curator review */
+export const a11yIssueReports = pgTable(
+  'a11y_issue_reports',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    packageName: varchar('package_name', { length: 255 }).notNull(),
+    version: varchar('version', { length: 64 }),
+    description: text('description').notNull(),
+    reporterEmail: varchar('reporter_email', { length: 255 }),
+    status: varchar('status', { length: 32 }).notNull().default('pending'),
+    ...timestamps,
+  },
+  (table) => ({
+    statusIdx: index('a11y_issue_reports_status_idx').on(table.status),
+  }),
+);
+
+export const a11yPackageIssuesRelations = relations(a11yPackageIssues, ({ many }) => ({
+  versions: many(a11yPackageVersions),
+}));
+
+export const a11yPackageVersionsRelations = relations(a11yPackageVersions, ({ one }) => ({
+  issue: one(a11yPackageIssues, {
+    fields: [a11yPackageVersions.issueId],
+    references: [a11yPackageIssues.id],
+  }),
+}));
+
+// ─── AN Learn (AN-F006 Phase 2 bootstrap) ────────────────────────────────────
+
+/** Curated accessibility lessons (public catalog; org progress is separate) */
+export const learnLessons = pgTable(
+  'learn_lessons',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    slug: varchar('slug', { length: 128 }).notNull(),
+    title: varchar('title', { length: 500 }).notNull(),
+    summary: text('summary').notNull(),
+    bodyMarkdown: text('body_markdown').notNull(),
+    durationMinutes: integer('duration_minutes').notNull().default(10),
+    sortOrder: integer('sort_order').notNull().default(0),
+    isPublished: boolean('is_published').notNull().default(true),
+    ...timestamps,
+  },
+  (table) => ({
+    slugUnique: uniqueIndex('learn_lessons_slug_uidx').on(table.slug),
+  }),
+);
+
+/** Per-user lesson progress (org-scoped for multi-tenant reporting) */
+export const learnProgress = pgTable(
+  'learn_progress',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    organisationId: orgId(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    lessonId: uuid('lesson_id')
+      .notNull()
+      .references(() => learnLessons.id, { onDelete: 'cascade' }),
+    status: varchar('status', { length: 32 }).notNull().default('started'),
+    completedAt: timestamp('completed_at', { withTimezone: true, mode: 'string' }),
+    ...timestamps,
+  },
+  (table) => ({
+    orgIdx: index('learn_progress_org_idx').on(table.organisationId),
+    userLessonUnique: uniqueIndex('learn_progress_user_lesson_uidx').on(
+      table.userId,
+      table.lessonId,
+    ),
+  }),
+);
+
+export const learnLessonsRelations = relations(learnLessons, ({ many }) => ({
+  progress: many(learnProgress),
+}));
+
+export const learnProgressRelations = relations(learnProgress, ({ one }) => ({
+  organisation: one(organisations, {
+    fields: [learnProgress.organisationId],
+    references: [organisations.id],
+  }),
+  user: one(users, { fields: [learnProgress.userId], references: [users.id] }),
+  lesson: one(learnLessons, {
+    fields: [learnProgress.lessonId],
+    references: [learnLessons.id],
+  }),
+}));
+
+// ─── AN Dynamic journeys (AN-F003) ───────────────────────────────────────────
+
+/** Authenticated multi-step journey definition (JSON DSL, YAML-compatible) */
+export const journeys = pgTable(
+  'journeys',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    organisationId: orgId(),
+    name: varchar('name', { length: 255 }).notNull(),
+    slug: varchar('slug', { length: 128 }).notNull(),
+    description: text('description'),
+    /** Zod-validated journey document: { startUrl, steps[] } */
+    definitionJson: jsonb('definition_json').notNull().$type<Record<string, unknown>>(),
+    isActive: boolean('is_active').notNull().default(true),
+    ...timestamps,
+    deletedAt: timestamp('deleted_at', { withTimezone: true, mode: 'string' }),
+  },
+  (table) => ({
+    orgIdx: index('journeys_org_idx').on(table.organisationId),
+    orgSlugUnique: uniqueIndex('journeys_org_slug_uidx').on(table.organisationId, table.slug),
+  }),
+);
+
+/** Encrypted credential bag for a journey (AES-256-GCM) */
+export const journeyCredentials = pgTable(
+  'journey_credentials',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    organisationId: orgId(),
+    journeyId: uuid('journey_id')
+      .notNull()
+      .references(() => journeys.id, { onDelete: 'cascade' }),
+    label: varchar('label', { length: 128 }).notNull().default('default'),
+    ciphertext: text('ciphertext').notNull(),
+    iv: varchar('iv', { length: 64 }).notNull(),
+    authTag: varchar('auth_tag', { length: 64 }).notNull(),
+    ...timestamps,
+  },
+  (table) => ({
+    journeyIdx: index('journey_credentials_journey_idx').on(table.journeyId),
+  }),
+);
+
+export const journeyScans = pgTable(
+  'journey_scans',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    organisationId: orgId(),
+    journeyId: uuid('journey_id')
+      .notNull()
+      .references(() => journeys.id, { onDelete: 'cascade' }),
+    status: varchar('status', { length: 32 }).notNull().default('queued'),
+    startedAt: timestamp('started_at', { withTimezone: true, mode: 'string' }),
+    completedAt: timestamp('completed_at', { withTimezone: true, mode: 'string' }),
+    errorMessage: text('error_message'),
+    /** Aggregated failure map: steps that failed or had critical/serious issues */
+    failureMapJson: jsonb('failure_map_json').$type<Record<string, unknown>>(),
+    totalViolations: integer('total_violations').notNull().default(0),
+    ...timestamps,
+  },
+  (table) => ({
+    orgIdx: index('journey_scans_org_idx').on(table.organisationId),
+    journeyIdx: index('journey_scans_journey_idx').on(table.journeyId),
+  }),
+);
+
+export const journeyStepResults = pgTable(
+  'journey_step_results',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    organisationId: orgId(),
+    journeyScanId: uuid('journey_scan_id')
+      .notNull()
+      .references(() => journeyScans.id, { onDelete: 'cascade' }),
+    stepId: varchar('step_id', { length: 128 }).notNull(),
+    stepIndex: integer('step_index').notNull(),
+    action: varchar('action', { length: 64 }).notNull(),
+    status: varchar('status', { length: 32 }).notNull(),
+    pageUrl: text('page_url'),
+    violationCount: integer('violation_count').notNull().default(0),
+    violationsJson: jsonb('violations_json').$type<unknown[]>().default([]),
+    errorMessage: text('error_message'),
+    durationMs: integer('duration_ms'),
+    ...timestamps,
+  },
+  (table) => ({
+    scanIdx: index('journey_step_results_scan_idx').on(table.journeyScanId),
+  }),
+);
+
+export const journeysRelations = relations(journeys, ({ many }) => ({
+  credentials: many(journeyCredentials),
+  scans: many(journeyScans),
+}));
+
+export const journeyCredentialsRelations = relations(journeyCredentials, ({ one }) => ({
+  journey: one(journeys, {
+    fields: [journeyCredentials.journeyId],
+    references: [journeys.id],
+  }),
+}));
+
+export const journeyScansRelations = relations(journeyScans, ({ one, many }) => ({
+  journey: one(journeys, {
+    fields: [journeyScans.journeyId],
+    references: [journeys.id],
+  }),
+  stepResults: many(journeyStepResults),
+}));
+
+export const journeyStepResultsRelations = relations(journeyStepResults, ({ one }) => ({
+  scan: one(journeyScans, {
+    fields: [journeyStepResults.journeyScanId],
+    references: [journeyScans.id],
   }),
 }));

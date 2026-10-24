@@ -5,10 +5,12 @@ import { AlertCircle, CheckCircle, Loader2, Pause } from 'lucide-react';
 import { Badge, Progress } from '@accessshield/ui';
 import { ViolationFilters } from '@/components/dashboard/scans/ViolationFilters';
 import { ViolationTable } from '@/components/dashboard/scans/ViolationTable';
+import { IssueSummaryList } from '@/components/dashboard/scans/IssueSummaryList';
+import { ScanPrioritizedPanel } from '@/components/dashboard/scans/ScanPrioritizedPanel';
 import { ScanLiveControls } from '@/components/dashboard/scans/ScanLiveControls';
 import { MobileScanSummary } from '@/components/dashboard/mobile/MobileScanSummary';
 import { LoadingState } from '@/components/dashboard/common/LoadingState';
-import { useScan, useViolations } from '@/lib/hooks/useApi';
+import { useIssueSummaries, useScan, useViolations } from '@/lib/hooks/useApi';
 import { formatIndianDate } from '@/lib/utils';
 import type { ComplianceStandard } from '@/lib/api/types';
 
@@ -51,15 +53,22 @@ export default function ScanDetailPage({ params }: { params: { id: string } }) {
     status: 'all',
     search: '',
   });
+  const [view, setView] = useState<'summary' | 'technical'>('summary');
 
   const { data: scan, isLoading: scanLoading } = useScan(scanId);
+  const summaryFilters = {
+    severity: filters.severity !== 'all' ? filters.severity : undefined,
+    standard: filters.standard !== 'all' ? filters.standard : undefined,
+  };
+  const { data: issueSummaries, isLoading: summariesLoading } = useIssueSummaries(
+    scanId,
+    summaryFilters,
+    scan?.status,
+  );
   const { data: violationsData, isLoading: violationsLoading } = useViolations(
     scanId,
-    {
-      severity: filters.severity !== 'all' ? filters.severity : undefined,
-      standard: filters.standard !== 'all' ? filters.standard : undefined,
-    },
-    scan?.status,
+    summaryFilters,
+    view === 'technical' ? scan?.status : undefined,
   );
 
   if (scanLoading) {
@@ -101,7 +110,7 @@ export default function ScanDetailPage({ params }: { params: { id: string } }) {
         <h1 className="text-3xl font-bold text-text-primary">Scan Results</h1>
         <p className="mt-2 text-text-secondary">
           {subtitle} · Score: {scan.score ?? '—'}/100
-          {scan.violationCount > 0 ? ` · ${scan.violationCount} violations` : ''}
+          {scan.violationCount > 0 ? ` · ${scan.violationCount} issues` : ''}
         </p>
         {scan.standards && scan.standards.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-2" aria-label="Standards in this scan">
@@ -206,33 +215,74 @@ export default function ScanDetailPage({ params }: { params: { id: string } }) {
       {scan.status === 'completed' && (
         <>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-            {(Object.keys(SEVERITY_CONFIG) as Array<keyof typeof SEVERITY_CONFIG>).map((severity) => {
-              const config = SEVERITY_CONFIG[severity];
-              const Icon =
-                severity === 'critical' || severity === 'serious' ? AlertCircle : CheckCircle;
+            {(Object.keys(SEVERITY_CONFIG) as Array<keyof typeof SEVERITY_CONFIG>).map(
+              (severity) => {
+                const config = SEVERITY_CONFIG[severity];
+                const Icon =
+                  severity === 'critical' || severity === 'serious' ? AlertCircle : CheckCircle;
 
-              return (
-                <div
-                  key={severity}
-                  className={`flex items-center gap-3 rounded-lg border p-4 ${config.color}`}
-                >
-                  <Icon className="h-5 w-5" aria-hidden="true" />
-                  <div>
-                    <p className="text-2xl font-bold">{severityCounts[severity] ?? 0}</p>
-                    <p className="text-sm">{config.label}</p>
+                return (
+                  <div
+                    key={severity}
+                    className={`flex items-center gap-3 rounded-lg border p-4 ${config.color}`}
+                  >
+                    <Icon className="h-5 w-5" aria-hidden="true" />
+                    <div>
+                      <p className="text-2xl font-bold">{severityCounts[severity] ?? 0}</p>
+                      <p className="text-sm">{config.label}</p>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              },
+            )}
           </div>
+
+          <ScanPrioritizedPanel scanId={scan.id} />
 
           <ViolationFilters filters={filters} onFiltersChange={setFilters} />
 
-          <ViolationTable
-            violations={violationsData?.rows ?? []}
-            isLoading={violationsLoading}
-            total={violationsData?.meta?.total ?? scan.violationCount}
-          />
+          <div className="flex flex-wrap gap-2" role="group" aria-label="How to view issues">
+            <button
+              type="button"
+              aria-pressed={view === 'summary'}
+              className={`inline-flex min-h-11 items-center rounded-md px-4 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 ${
+                view === 'summary'
+                  ? 'bg-primary-600 text-white'
+                  : 'border border-gray-300 bg-white text-text-primary hover:bg-bg-secondary'
+              }`}
+              onClick={() => setView('summary')}
+            >
+              Simple summary
+            </button>
+            <button
+              type="button"
+              aria-pressed={view === 'technical'}
+              className={`inline-flex min-h-11 items-center rounded-md px-4 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 ${
+                view === 'technical'
+                  ? 'bg-primary-600 text-white'
+                  : 'border border-gray-300 bg-white text-text-primary hover:bg-bg-secondary'
+              }`}
+              onClick={() => setView('technical')}
+            >
+              Technical list
+            </button>
+          </div>
+
+          <div>
+            {view === 'summary' ? (
+              <IssueSummaryList
+                issues={issueSummaries ?? []}
+                isLoading={summariesLoading}
+                search={filters.search}
+              />
+            ) : (
+              <ViolationTable
+                violations={violationsData?.rows ?? []}
+                isLoading={violationsLoading}
+                total={violationsData?.meta?.total ?? scan.violationCount}
+              />
+            )}
+          </div>
         </>
       )}
 
@@ -242,7 +292,9 @@ export default function ScanDetailPage({ params }: { params: { id: string } }) {
             <AlertCircle className="h-5 w-5 text-text-secondary" aria-hidden="true" />
             <h3 className="font-medium text-text-primary">Scan cancelled</h3>
           </div>
-          <p className="mt-2 text-sm text-text-secondary">You stopped this scan before it finished.</p>
+          <p className="mt-2 text-sm text-text-secondary">
+            You stopped this scan before it finished.
+          </p>
         </div>
       )}
 

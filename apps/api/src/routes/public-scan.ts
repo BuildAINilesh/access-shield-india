@@ -7,7 +7,7 @@
 
 import type { Database } from '@accessshield/db';
 import { assets, organisations, scans, violations } from '@accessshield/db';
-import type { ApiResponse } from '@accessshield/types';
+import type { ApiResponse, IssueSummary } from '@accessshield/types';
 import { and, count, desc, eq, sql } from 'drizzle-orm';
 import type { Request, Response, Router as ExpressRouter } from 'express';
 import { Router } from 'express';
@@ -20,6 +20,7 @@ import { PUBLIC_SCANS_ORG_ID } from '../scanner/public-scan-org';
 import { isScanPipelineV2ScanJobsEnabled } from '../scanner/v2/queues';
 import { publishScanJobsMessage } from '../scanner/v2/publish';
 import { DEFAULT_SCAN_CONFIG } from '../scanner/types';
+import { listIssueSummaries } from '../scanner/issue-summaries';
 
 /** Soft abuse guard — not a product limit. Same email may scan many times. */
 const MAX_SCANS_PER_IP_PER_DAY = 50;
@@ -153,7 +154,7 @@ export function createPublicScanRouter(db: Database, redis: Redis): ExpressRoute
         const publicConfig = {
           maxPages: 10,
           wcagLevel: 'AA' as const,
-          standards: ['WCAG22', 'IS17802'] as const,
+          standards: ['WCAG22'] as const,
           excludePaths: [] as string[],
           viewports: DEFAULT_SCAN_CONFIG.viewports!,
         };
@@ -227,6 +228,7 @@ export function createPublicScanRouter(db: Database, redis: Redis): ExpressRoute
           status: scans.status,
           pagesScanned: scans.pagesScanned,
           score: scans.score,
+          errorMessage: scans.errorMessage,
           createdAt: scans.createdAt,
           organisationId: scans.organisationId,
         })
@@ -284,6 +286,13 @@ export function createPublicScanRouter(db: Database, redis: Redis): ExpressRoute
       const moderateCount = severityCounts.find((c) => c.impact === 'moderate')?.count || 0;
       const minorCount = severityCounts.find((c) => c.impact === 'minor')?.count || 0;
 
+      const topIssues = (
+        await listIssueSummaries(db, {
+          scanId,
+          organisationId: PUBLIC_SCANS_ORG_ID,
+        })
+      ).slice(0, 5);
+
       const topViolations = await db
         .select({
           id: violations.id,
@@ -311,7 +320,8 @@ export function createPublicScanRouter(db: Database, redis: Redis): ExpressRoute
         .where(eq(violations.scanId, scanId));
 
       const totalViolations = totalViolationsResult?.count || 0;
-      const remainingViolationsCount = Math.max(0, totalViolations - topViolations.length);
+      const shownInSummary = topIssues.reduce((total, issue) => total + issue.count, 0);
+      const remainingViolationsCount = Math.max(0, totalViolations - shownInSummary);
 
       const response: ApiResponse<{
         status: string;
@@ -319,11 +329,13 @@ export function createPublicScanRouter(db: Database, redis: Redis): ExpressRoute
         pagesTotal: number;
         currentUrl?: string;
         score?: number;
+        errorMessage?: string;
         criticalCount: number;
         seriousCount: number;
         moderateCount: number;
         minorCount: number;
         topViolations: typeof topViolations;
+        topIssues: IssueSummary[];
         remainingViolationsCount: number;
       }> = {
         data: {
@@ -332,11 +344,13 @@ export function createPublicScanRouter(db: Database, redis: Redis): ExpressRoute
           pagesTotal,
           currentUrl,
           score: scan.score ?? undefined,
+          errorMessage: scan.errorMessage ?? undefined,
           criticalCount,
           seriousCount,
           moderateCount,
           minorCount,
           topViolations,
+          topIssues,
           remainingViolationsCount,
         },
         timestamp: new Date().toISOString(),

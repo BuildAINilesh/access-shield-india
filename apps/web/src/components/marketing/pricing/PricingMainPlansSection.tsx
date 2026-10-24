@@ -1,10 +1,17 @@
 'use client';
 
+import { useState } from 'react';
 import { ButtonLink } from '@/components/marketing/ButtonLink';
+import { PricingBillingToggle } from '@/components/marketing/pricing/PricingBillingToggle';
+import { PricingCurrencyToggle } from '@/components/marketing/pricing/PricingCurrencyToggle';
 import {
   assessCheckoutSubline,
+  formatPlanPrice,
   MONTHLY_PLANS,
+  taxNote,
+  type BillingPeriod,
   type MonthlyPlan,
+  type PricingCurrency,
 } from '@/lib/pricing/catalog';
 
 function PlanBadges({ plan }: { plan: MonthlyPlan }) {
@@ -15,7 +22,9 @@ function PlanBadges({ plan }: { plan: MonthlyPlan }) {
           className={`inline-flex rounded-full px-3 py-0.5 text-xs font-semibold ${
             plan.noAuditRequired
               ? 'bg-accent-100 text-accent-700'
-              : 'bg-primary-100 text-primary-700'
+              : plan.indiaPack
+                ? 'bg-amber-100 text-amber-900'
+                : 'bg-primary-100 text-primary-700'
           }`}
         >
           {plan.badge}
@@ -31,6 +40,9 @@ function PlanBadges({ plan }: { plan: MonthlyPlan }) {
 }
 
 export function PricingMainPlansSection() {
+  const [currency, setCurrency] = useState<PricingCurrency>('INR');
+  const [period, setPeriod] = useState<BillingPeriod>('monthly');
+
   return (
     <section id="step-plans" className="mt-16 scroll-mt-20" aria-labelledby="pricing-plans-heading">
       <div className="text-center">
@@ -42,9 +54,13 @@ export function PricingMainPlansSection() {
           Pick your plan
         </h2>
         <p className="mx-auto mt-3 max-w-2xl text-base leading-normal text-text-secondary">
-          Ongoing plans to keep your site welcoming after remediation — widget, scans, and
-          monitoring for teams and regulators. Contact sales for a tailored quote.
+          WCAG-first monitoring for global teams — add Regulatory Defense for the India pack.{' '}
+          {taxNote(currency)}.
         </p>
+        <div className="mt-6 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+          <PricingCurrencyToggle currency={currency} onChange={setCurrency} />
+          <PricingBillingToggle period={period} onChange={setPeriod} />
+        </div>
       </div>
 
       <div className="mt-12 grid grid-cols-1 items-stretch gap-6 md:grid-cols-2 xl:grid-cols-4">
@@ -68,6 +84,9 @@ export function PricingMainPlansSection() {
               <h3 className="text-xl font-bold text-text-primary">{plan.name}</h3>
               <p className="mt-2 min-h-[3rem] text-sm leading-normal text-text-secondary">
                 {plan.description}
+              </p>
+              <p className="mt-4 text-3xl font-bold text-primary-600">
+                {formatPlanPrice(plan, period, currency)}
               </p>
 
               {plan.checkoutNote === 'assess' && (

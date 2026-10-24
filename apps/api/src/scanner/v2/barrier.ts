@@ -30,10 +30,7 @@ async function ensureRedis(): Promise<Redis | null> {
   return redis.status === 'ready' ? redis : null;
 }
 
-export async function setScanBarrier(
-  scanId: string,
-  state: ScanBarrierState,
-): Promise<void> {
+export async function setScanBarrier(scanId: string, state: ScanBarrierState): Promise<void> {
   const redis = await ensureRedis();
   if (!redis) return;
   try {

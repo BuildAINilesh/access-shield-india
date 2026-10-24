@@ -1,0 +1,34 @@
+{
+  "name": "@accessiblenow/scan",
+  "version": "0.1.0",
+  "description": "AccessibleNow OSS CLI — scan package.json for known accessibility risks in dependencies (AN-F002)",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "accessiblenow-scan": "./dist/cli.js",
+    "an-scan": "./dist/cli.js"
+  },
+  "main": "./dist/cli.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/cli.ts",
+    "start": "node dist/cli.js",
+    "lint": "eslint src/",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "devDependencies": {
+    "@accessshield/config": "workspace:*",
+    "@types/node": "^20.14.9",
+    "eslint": "^8.57.0",
+    "tsx": "^4.16.0",
+    "typescript": "^5.5.2",
+    "vitest": "^1.6.0"
+  }
+}

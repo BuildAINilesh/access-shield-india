@@ -1,7 +1,7 @@
 /** Plan-based resource limits for billing / usage endpoints */
 
 /**
- * Monthly subscription prices in paise — keep in sync with
+ * Monthly subscription prices in paise (INR) and cents (USD) — keep in sync with
  * apps/web/src/lib/pricing/catalog.ts
  */
 export const SUBSCRIPTION_PLAN_PRICES_PAISE: Record<string, { monthly: number; annual: number }> = {
@@ -13,6 +13,20 @@ export const SUBSCRIPTION_PLAN_PRICES_PAISE: Record<string, { monthly: number; a
   compliance_shield: { monthly: 499900, annual: 4999000 },
   regulatory_defense: { monthly: 799900, annual: 7999000 },
   enterprise: { monthly: 1299900, annual: 12999000 },
+};
+
+/** USD list prices in cents — mirror of catalog USD amounts */
+export const SUBSCRIPTION_PLAN_PRICES_USD_CENTS: Record<
+  string,
+  { monthly: number; annual: number }
+> = {
+  widget: { monthly: 1200, annual: 12000 },
+  starter: { monthly: 0, annual: 0 },
+  professional: { monthly: 2400, annual: 24000 },
+  government: { monthly: 5900, annual: 59000 },
+  compliance_shield: { monthly: 5900, annual: 59000 },
+  regulatory_defense: { monthly: 9900, annual: 99000 },
+  enterprise: { monthly: 14900, annual: 149000 },
 };
 
 export const PLAN_ASSET_LIMITS: Record<string, number | null> = {
