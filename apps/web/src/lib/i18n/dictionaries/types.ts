@@ -258,6 +258,7 @@ export interface DashboardDict {
     assets: string;
     scans: string;
     documentScanner: string;
+    journeys: string;
     issues: string;
     reports: string;
     certificates: string;

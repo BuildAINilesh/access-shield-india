@@ -140,17 +140,17 @@ export const features: FeaturesDict = {
       tagline: 'Authenticated journey testing (DAST)',
       snykParallel: 'Snyk API & Web (DAST)',
       summary:
-        'Playwright journeys with axe at each step — login, checkout, investor portals — so you scan the flows regulators care about, not only the homepage.',
+        'Playwright journeys with axe at chosen steps — login, checkout, investor portals. Create journeys in the portal under Journeys; JSON DSL (YAML-compatible) with encrypted credentials.',
       userStories: [
-        'Scan authenticated investor or banking journeys end to end.',
-        'Maintain journeys in YAML without writing code.',
-        'See a failure map of where assistive tech users get stuck.',
+        'Scan authenticated journeys end to end from the dashboard.',
+        'Author steps as navigate / fill / click / wait / axe.',
+        'See a failure map of stuck steps and axe hotspots.',
       ],
       capabilities: [
-        'YAML journey DSL (navigate, click, fill, wait, assert)',
-        'Encrypted credential vault',
-        'Per-step violation tagging',
-        'Session recording with AT speech log',
+        'JSON journey DSL (YAML-compatible keys)',
+        'AES-256-GCM credential vault',
+        'RabbitMQ journey_scans worker + per-step axe',
+        'Failure map UI (recording / AT speech next)',
       ],
     },
     intelligence: {
@@ -158,17 +158,17 @@ export const features: FeaturesDict = {
       tagline: 'The accessibility issue registry',
       snykParallel: 'Snyk Vulnerability Database',
       summary:
-        'Curated registry of known accessibility failures in npm packages, widgets, payment gateways, and SaaS tools — the data moat behind OSS scans and PR Gate.',
+        'Curated registry of known accessibility failures in npm packages, widgets, payment gateways, and SaaS tools — browse at /intelligence; same data powers OSS scans and PR Gate.',
       userStories: [
         'Search a library before you adopt it.',
-        'Export a third-party risk register for audits.',
-        'Contribute verified findings as a researcher.',
+        'Open an AN-XXX issue with version ranges and workarounds.',
+        'Submit a community report for curator review.',
       ],
       capabilities: [
-        'Public search by package, severity, and AT affected',
+        'Public search by package, severity, and keyword',
         'AN-XXX-000 issue IDs and version ranges',
-        'Bulk JSON/CSV export',
-        'Subscription alerts for packages you use',
+        'Community report form',
+        'CLI + PR Gate share the same database',
       ],
     },
     learn: {
@@ -176,17 +176,17 @@ export const features: FeaturesDict = {
       tagline: 'Short lessons linked from real violations',
       snykParallel: 'Snyk Learn',
       summary:
-        '3–5 minute lessons on WCAG and India-specific patterns, linked from PR comments and IDE diagnostics, with org progress and certification paths.',
+        '3–5 minute lessons on WCAG patterns, linked from IDE diagnostics. Lesson catalog is live at /learn; org progress and certificates expand next.',
       userStories: [
-        'Open a 3-minute lesson from a PR violation.',
-        'See which topics your team has completed.',
-        'Assign an IS 17802 developer path from L&D.',
+        'Open a short lesson from a scan or IDE finding.',
+        'Read alt text, keyboard, and form error fundamentals.',
+        'Track completion when signed in (API ready).',
       ],
       capabilities: [
-        '50+ lessons mapped to violation IDs',
-        'Interactive sandbox + quiz',
-        'Org learning dashboard',
-        'QR-verifiable certificates',
+        'Published lesson catalog (API + /learn)',
+        'Markdown lesson bodies',
+        'Auth progress endpoint (started/completed)',
+        'Quizzes and certificates (next)',
       ],
     },
     policy: {

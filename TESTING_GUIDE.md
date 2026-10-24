@@ -66,6 +66,14 @@ GITHUB_APP_CLIENT_SECRET=
 3. **GitHub Apply:** Set `GITHUB_APP_*` env, restart API, Connect GitHub App, open an issue AI fix → **Apply fix to GitHub** with `owner/repo` + file path.
 4. **Figma:** `pnpm --filter @accessiblenow/figma-plugin build` → Figma Desktop → Plugins → Development → Import `apps/figma-plugin/manifest.json`.
 
+### Phase 2 — Dynamic journeys smoke (AN-F003)
+
+1. `pnpm db:migrate` (includes `0017_dynamic_journeys`).
+2. Start API + worker (`pnpm --filter @accessshield/api dev` and `dev:worker`) with `RABBITMQ_URL` set.
+3. Portal → **Journeys** → New journey → paste JSON DSL (use `{{creds.username}}` / `{{creds.password}}`) → Save.
+4. Open journey → **Run journey scan** → watch Failure map for step statuses + axe hotspots.
+5. Optional: set `JOURNEY_CREDENTIALS_KEY` (64 hex chars) for a dedicated AES key; otherwise `AUTH_SECRET` is derived.
+
 ### 3. Start Development Servers
 
 **Option A: Start All Services**

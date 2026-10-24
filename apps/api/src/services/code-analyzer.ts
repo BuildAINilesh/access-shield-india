@@ -45,7 +45,7 @@ const RULES: RuleDef[] = [
     message: 'Image is missing an alt attribute',
     severity: 'error',
     wcagCriteria: ['1.1.1'],
-    learnPath: '/features/learn',
+    learnPath: '/learn',
     matchLine: (line, filetype) => {
       if (!isHtmlLike(filetype)) return null;
       if (!/<img\b/i.test(line)) return null;
@@ -59,7 +59,7 @@ const RULES: RuleDef[] = [
     message: 'Button has no accessible name (text, aria-label, or aria-labelledby)',
     severity: 'error',
     wcagCriteria: ['4.1.2'],
-    learnPath: '/features/learn',
+    learnPath: '/learn',
     matchLine: (line, filetype) => {
       if (!isHtmlLike(filetype)) return null;
       const selfClosing = /<button\b[^>]*\/\s*>/i.test(line);
@@ -82,7 +82,7 @@ const RULES: RuleDef[] = [
     message: 'Form control is missing an associated label or accessible name',
     severity: 'error',
     wcagCriteria: ['1.3.1', '3.3.2'],
-    learnPath: '/features/learn',
+    learnPath: '/learn',
     matchLine: (line, filetype) => {
       if (!isHtmlLike(filetype)) return null;
       if (!/<(input|select|textarea)\b/i.test(line)) return null;
@@ -115,7 +115,7 @@ const RULES: RuleDef[] = [
     message: 'Link has no discernible text',
     severity: 'error',
     wcagCriteria: ['2.4.4', '4.1.2'],
-    learnPath: '/features/learn',
+    learnPath: '/learn',
     matchLine: (line, filetype) => {
       if (!isHtmlLike(filetype)) return null;
       const empty =
@@ -134,7 +134,7 @@ const RULES: RuleDef[] = [
     message: 'Root html element is missing a lang attribute',
     severity: 'error',
     wcagCriteria: ['3.1.1'],
-    learnPath: '/features/learn',
+    learnPath: '/learn',
     matchLine: (line, filetype) => {
       if (filetype !== 'html') return null;
       if (!/<html\b/i.test(line)) return null;
@@ -148,7 +148,7 @@ const RULES: RuleDef[] = [
     message: 'Avoid autofocus — it can disorient keyboard and screen-reader users',
     severity: 'warning',
     wcagCriteria: ['2.4.3'],
-    learnPath: '/features/learn',
+    learnPath: '/learn',
     matchLine: (line, filetype) => {
       if (!isHtmlLike(filetype)) return null;
       if (!/\bautofocus\b/i.test(line)) return null;

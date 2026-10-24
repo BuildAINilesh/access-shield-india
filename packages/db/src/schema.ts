@@ -1007,3 +1007,182 @@ export const a11yPackageVersionsRelations = relations(a11yPackageVersions, ({ on
     references: [a11yPackageIssues.id],
   }),
 }));
+
+// ─── AN Learn (AN-F006 Phase 2 bootstrap) ────────────────────────────────────
+
+/** Curated accessibility lessons (public catalog; org progress is separate) */
+export const learnLessons = pgTable(
+  'learn_lessons',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    slug: varchar('slug', { length: 128 }).notNull(),
+    title: varchar('title', { length: 500 }).notNull(),
+    summary: text('summary').notNull(),
+    bodyMarkdown: text('body_markdown').notNull(),
+    durationMinutes: integer('duration_minutes').notNull().default(10),
+    sortOrder: integer('sort_order').notNull().default(0),
+    isPublished: boolean('is_published').notNull().default(true),
+    ...timestamps,
+  },
+  (table) => ({
+    slugUnique: uniqueIndex('learn_lessons_slug_uidx').on(table.slug),
+  }),
+);
+
+/** Per-user lesson progress (org-scoped for multi-tenant reporting) */
+export const learnProgress = pgTable(
+  'learn_progress',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    organisationId: orgId(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    lessonId: uuid('lesson_id')
+      .notNull()
+      .references(() => learnLessons.id, { onDelete: 'cascade' }),
+    status: varchar('status', { length: 32 }).notNull().default('started'),
+    completedAt: timestamp('completed_at', { withTimezone: true, mode: 'string' }),
+    ...timestamps,
+  },
+  (table) => ({
+    orgIdx: index('learn_progress_org_idx').on(table.organisationId),
+    userLessonUnique: uniqueIndex('learn_progress_user_lesson_uidx').on(
+      table.userId,
+      table.lessonId,
+    ),
+  }),
+);
+
+export const learnLessonsRelations = relations(learnLessons, ({ many }) => ({
+  progress: many(learnProgress),
+}));
+
+export const learnProgressRelations = relations(learnProgress, ({ one }) => ({
+  organisation: one(organisations, {
+    fields: [learnProgress.organisationId],
+    references: [organisations.id],
+  }),
+  user: one(users, { fields: [learnProgress.userId], references: [users.id] }),
+  lesson: one(learnLessons, {
+    fields: [learnProgress.lessonId],
+    references: [learnLessons.id],
+  }),
+}));
+
+// ─── AN Dynamic journeys (AN-F003) ───────────────────────────────────────────
+
+/** Authenticated multi-step journey definition (JSON DSL, YAML-compatible) */
+export const journeys = pgTable(
+  'journeys',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    organisationId: orgId(),
+    name: varchar('name', { length: 255 }).notNull(),
+    slug: varchar('slug', { length: 128 }).notNull(),
+    description: text('description'),
+    /** Zod-validated journey document: { startUrl, steps[] } */
+    definitionJson: jsonb('definition_json').notNull().$type<Record<string, unknown>>(),
+    isActive: boolean('is_active').notNull().default(true),
+    ...timestamps,
+    deletedAt: timestamp('deleted_at', { withTimezone: true, mode: 'string' }),
+  },
+  (table) => ({
+    orgIdx: index('journeys_org_idx').on(table.organisationId),
+    orgSlugUnique: uniqueIndex('journeys_org_slug_uidx').on(table.organisationId, table.slug),
+  }),
+);
+
+/** Encrypted credential bag for a journey (AES-256-GCM) */
+export const journeyCredentials = pgTable(
+  'journey_credentials',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    organisationId: orgId(),
+    journeyId: uuid('journey_id')
+      .notNull()
+      .references(() => journeys.id, { onDelete: 'cascade' }),
+    label: varchar('label', { length: 128 }).notNull().default('default'),
+    ciphertext: text('ciphertext').notNull(),
+    iv: varchar('iv', { length: 64 }).notNull(),
+    authTag: varchar('auth_tag', { length: 64 }).notNull(),
+    ...timestamps,
+  },
+  (table) => ({
+    journeyIdx: index('journey_credentials_journey_idx').on(table.journeyId),
+  }),
+);
+
+export const journeyScans = pgTable(
+  'journey_scans',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    organisationId: orgId(),
+    journeyId: uuid('journey_id')
+      .notNull()
+      .references(() => journeys.id, { onDelete: 'cascade' }),
+    status: varchar('status', { length: 32 }).notNull().default('queued'),
+    startedAt: timestamp('started_at', { withTimezone: true, mode: 'string' }),
+    completedAt: timestamp('completed_at', { withTimezone: true, mode: 'string' }),
+    errorMessage: text('error_message'),
+    /** Aggregated failure map: steps that failed or had critical/serious issues */
+    failureMapJson: jsonb('failure_map_json').$type<Record<string, unknown>>(),
+    totalViolations: integer('total_violations').notNull().default(0),
+    ...timestamps,
+  },
+  (table) => ({
+    orgIdx: index('journey_scans_org_idx').on(table.organisationId),
+    journeyIdx: index('journey_scans_journey_idx').on(table.journeyId),
+  }),
+);
+
+export const journeyStepResults = pgTable(
+  'journey_step_results',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    organisationId: orgId(),
+    journeyScanId: uuid('journey_scan_id')
+      .notNull()
+      .references(() => journeyScans.id, { onDelete: 'cascade' }),
+    stepId: varchar('step_id', { length: 128 }).notNull(),
+    stepIndex: integer('step_index').notNull(),
+    action: varchar('action', { length: 64 }).notNull(),
+    status: varchar('status', { length: 32 }).notNull(),
+    pageUrl: text('page_url'),
+    violationCount: integer('violation_count').notNull().default(0),
+    violationsJson: jsonb('violations_json').$type<unknown[]>().default([]),
+    errorMessage: text('error_message'),
+    durationMs: integer('duration_ms'),
+    ...timestamps,
+  },
+  (table) => ({
+    scanIdx: index('journey_step_results_scan_idx').on(table.journeyScanId),
+  }),
+);
+
+export const journeysRelations = relations(journeys, ({ many }) => ({
+  credentials: many(journeyCredentials),
+  scans: many(journeyScans),
+}));
+
+export const journeyCredentialsRelations = relations(journeyCredentials, ({ one }) => ({
+  journey: one(journeys, {
+    fields: [journeyCredentials.journeyId],
+    references: [journeys.id],
+  }),
+}));
+
+export const journeyScansRelations = relations(journeyScans, ({ one, many }) => ({
+  journey: one(journeys, {
+    fields: [journeyScans.journeyId],
+    references: [journeys.id],
+  }),
+  stepResults: many(journeyStepResults),
+}));
+
+export const journeyStepResultsRelations = relations(journeyStepResults, ({ one }) => ({
+  scan: one(journeyScans, {
+    fields: [journeyStepResults.journeyScanId],
+    references: [journeyScans.id],
+  }),
+}));

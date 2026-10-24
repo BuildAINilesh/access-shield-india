@@ -25,6 +25,8 @@ import { createFixesRouter } from './routes/fixes';
 import { createIntegrationsRouter } from './routes/integrations';
 import { createIntelligenceRouter } from './routes/intelligence';
 import { createIssuesRouter } from './routes/issues';
+import { createDynamicRouter } from './routes/dynamic';
+import { createLearnAuthRouter, createLearnPublicRouter } from './routes/learn';
 import { createOssRouter } from './routes/oss';
 import { createWebhooksRouter } from './routes/webhooks';
 import { createNotificationsRouter } from './routes/notifications';
@@ -134,6 +136,10 @@ async function bootstrap() {
   const intelligenceRouter = createIntelligenceRouter(db);
   app.use('/api/v1/intelligence', intelligenceRouter);
 
+  // AN Learn catalog is public; progress mounts after auth below
+  const learnPublicRouter = createLearnPublicRouter(db);
+  app.use('/api/v1/learn', learnPublicRouter);
+
   const authMiddleware = createAuthMiddleware(secrets, db);
   app.use('/api/v1', authMiddleware);
 
@@ -188,6 +194,12 @@ async function bootstrap() {
 
   const webhooksRouter = createWebhooksRouter(db);
   app.use('/api/v1/webhooks', webhooksRouter);
+
+  const learnAuthRouter = createLearnAuthRouter(db);
+  app.use('/api/v1/learn', learnAuthRouter);
+
+  const dynamicRouter = createDynamicRouter(db);
+  app.use('/api/v1/dynamic', dynamicRouter);
 
   const adminRouter = createAdminRouter(db, secrets, redis);
   app.use('/api/v1/admin', adminRouter);

@@ -40,6 +40,7 @@ import { startSlackDigestJob } from '../jobs/slack-digest';
 import { startWidgetAnalyticsRollupJob } from '../jobs/widget-analytics-rollup';
 import { createDb } from '@accessshield/db';
 import Redis from 'ioredis';
+import { shutdownJourneyWorker, startJourneyWorker } from './journey-worker';
 
 logger.info('Starting AccessShield scan worker...');
 
@@ -49,6 +50,7 @@ let stopSlackDigest: (() => void) | null = null;
 const gracefulShutdown = async () => {
   stopAnalyticsRollup?.();
   stopSlackDigest?.();
+  await shutdownJourneyWorker();
   if (isScanPipelineV2Enabled()) {
     await shutdownCrawlerWorker();
     await shutdownPageScanWorker();
@@ -74,6 +76,7 @@ async function main(): Promise<void> {
     await redis.connect();
     stopAnalyticsRollup = startWidgetAnalyticsRollupJob(db, redis);
     stopSlackDigest = startSlackDigestJob(db, redis);
+    await startJourneyWorker(db);
   }
 
   if (isScanPipelineV2Enabled()) {

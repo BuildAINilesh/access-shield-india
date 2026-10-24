@@ -15,11 +15,17 @@ export function FeatureDetail({ meta, item, dict }: FeatureDetailProps) {
   const phaseLabel = dict.phases[meta.phase];
   const statusLabel = dict.status[meta.status];
   const primaryCta =
-    meta.status === 'available'
-      ? { href: '/scan', label: dict.cta.freeScan }
-      : meta.status === 'in_progress'
-        ? { href: `/contact?feature=${meta.slug}`, label: dict.cta.contact }
-        : { href: `/waitlist?feature=${meta.slug}`, label: dict.cta.waitlist };
+    meta.slug === 'intelligence' && meta.status === 'available'
+      ? { href: '/intelligence', label: 'Browse Intelligence' }
+      : meta.slug === 'learn' && (meta.status === 'available' || meta.status === 'in_progress')
+        ? { href: '/learn', label: 'Open Learn' }
+        : meta.slug === 'dynamic' && meta.status === 'in_progress'
+          ? { href: '/dashboard/journeys', label: 'Open Journeys' }
+          : meta.status === 'available'
+            ? { href: '/scan', label: dict.cta.freeScan }
+            : meta.status === 'in_progress'
+              ? { href: `/contact?feature=${meta.slug}`, label: dict.cta.contact }
+              : { href: `/waitlist?feature=${meta.slug}`, label: dict.cta.waitlist };
 
   return (
     <>

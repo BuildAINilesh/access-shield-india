@@ -139,17 +139,17 @@ export const features: FeaturesDict = {
       tagline: 'Authenticated journey testing (DAST)',
       snykParallel: 'Snyk API & Web (DAST)',
       summary:
-        'Playwright journeys में हर step पर axe — login, checkout, investor portals — homepage ही नहीं, regulators वाले flows भी।',
+        'Playwright journeys + चुने steps पर axe — login, checkout, investor portals. Dashboard → Journeys; JSON DSL (YAML-compatible) + encrypted credentials.',
       userStories: [
-        'Authenticated journeys end-to-end scan करें।',
-        'YAML में journeys maintain करें।',
-        'AT users कहाँ stuck होते हैं, failure map देखें।',
+        'Dashboard से authenticated journeys end-to-end scan करें।',
+        'Steps: navigate / fill / click / wait / axe लिखें।',
+        'Stuck steps और axe hotspots का failure map देखें।',
       ],
       capabilities: [
-        'YAML journey DSL',
-        'Encrypted credential vault',
-        'Per-step violation tagging',
-        'Session recording + AT speech log',
+        'JSON journey DSL (YAML-compatible keys)',
+        'AES-256-GCM credential vault',
+        'RabbitMQ journey_scans + per-step axe',
+        'Failure map UI (recording / AT speech अगला)',
       ],
     },
     intelligence: {
@@ -157,17 +157,17 @@ export const features: FeaturesDict = {
       tagline: 'Accessibility issue registry',
       snykParallel: 'Snyk Vulnerability Database',
       summary:
-        'npm packages, widgets, payment gateways की known accessibility failures का curated registry — OSS scans और PR Gate का data moat।',
+        'npm packages की known a11y failures का curated registry — /intelligence पर browse; OSS scans और PR Gate वही data इस्तेमाल करते हैं।',
       userStories: [
         'Adopt करने से पहले library search करें।',
-        'Audit के लिए third-party risk register export करें।',
-        'Researcher के रूप में verified findings contribute करें।',
+        'AN-XXX issue की version ranges और workarounds देखें।',
+        'Community report submit करें।',
       ],
       capabilities: [
-        'Package / severity / AT से public search',
+        'Package / severity / keyword से public search',
         'AN-XXX-000 IDs और version ranges',
-        'JSON/CSV bulk export',
-        'Package alert subscriptions',
+        'Community report form',
+        'CLI + PR Gate same database',
       ],
     },
     learn: {
@@ -175,17 +175,17 @@ export const features: FeaturesDict = {
       tagline: 'Violations से linked short lessons',
       snykParallel: 'Snyk Learn',
       summary:
-        'WCAG और India-specific patterns पर 3–5 minute lessons — PR comments और IDE diagnostics से linked, org progress और certificates के साथ।',
+        'WCAG patterns पर छोटे lessons — /learn catalog live है; org progress और certificates अगले हैं।',
       userStories: [
-        'PR violation से 3-minute lesson खोलें।',
-        'Team ने कौन से topics पूरे किए, देखें।',
-        'L&D से IS 17802 developer path assign करें।',
+        'Scan/IDE finding से short lesson खोलें।',
+        'Alt text, keyboard, form errors fundamentals पढ़ें।',
+        'Signed-in progress track करें (API ready)।',
       ],
       capabilities: [
-        '50+ lessons mapped to violation IDs',
-        'Interactive sandbox + quiz',
-        'Org learning dashboard',
-        'QR-verifiable certificates',
+        'Published lesson catalog (API + /learn)',
+        'Markdown lesson bodies',
+        'Auth progress endpoint',
+        'Quizzes / certificates (next)',
       ],
     },
     policy: {
