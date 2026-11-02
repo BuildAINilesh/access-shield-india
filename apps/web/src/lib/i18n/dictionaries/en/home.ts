@@ -9,21 +9,22 @@ export const home: HomeDict = {
   hero: {
     urgencyAria: 'Compliance urgency',
     badges: ['SEBI deadline Apr 2026', 'GIGW 3.0 · Govt portals', 'RPwD Act 2016'],
-    titleLine1: 'Accessible to',
-    titleHighlight: 'all Indians',
-    titleLine2: 'Auditable for your regulators.',
+    titleLine1: 'From free scan to',
+    titleHighlight: 'RPwD-ready',
+    titleLine2: 'programme.',
     subtitle:
-      "India's platform for BFSI, PSUs, and government vendors — scan websites and mobile apps, remove barriers for people with disabilities, and produce RPwD, GIGW, IS 17802 & SEBI evidence your audit file demands.",
+      'Discover barriers with a free scan, fix with Developer/Professional SaaS, prove with expert audits and Enterprise evidence packs — for BFSI, PSUs, and government vendors across India.',
     sectorsAria: 'Who we serve',
     sectors: ['BFSI & listed cos.', 'PSUs & ministries', 'Govt vendors', 'Audit-ready reports'],
     trustPoints: [
-      'WCAG 2.2 AA + IS 17802 scans for websites & mobile apps',
-      'Audit-ready PDFs for SEBI, RPwD, GIGW & tender committees',
-      'Remediation, widget, monitoring & IAAP sign-off pathways',
+      'Free scan finds issues — paid product + experts close the gap',
+      'WCAG 2.2 AA + IS 17802 · automated scans alone ≠ full conformance',
+      'Expert audits, SEBI/GIGW/RPwD packs, monitoring & training',
     ],
-    bookDemo: 'Book enterprise demo',
+    bookDemo: 'Talk Enterprise sales',
     runScan: 'Run free scan',
-    footnote: 'GST invoicing · PO & annual contracts for government · No credit card for free scan',
+    footnote:
+      'Illustrative India pricing · +18% GST · Automated scan ≠ full WCAG/RPwD/SEBI conformance',
     standardsAria: 'Supported compliance standards',
     standards: ['RPwD Act 2016', 'IS 17802', 'WCAG 2.2 AA', 'GIGW 3.0', 'SEBI 2024'],
     reportCard: {

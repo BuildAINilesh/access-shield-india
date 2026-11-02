@@ -66,6 +66,12 @@ export const issueSeverityEnum = pgEnum('issue_severity', [
   'minor',
 ]);
 
+export const violationReviewStatusEnum = pgEnum('violation_review_status', [
+  'confirmed',
+  'potential',
+  'needs_manual',
+]);
+
 export const invoiceStatusEnum = pgEnum('invoice_status', [
   'draft',
   'sent',
@@ -108,7 +114,7 @@ export const organisations = pgTable(
     gstin: varchar('gstin', { length: 15 }),
     billingEmail: varchar('billing_email', { length: 255 }),
     isActive: boolean('is_active').notNull().default(true),
-    planTier: varchar('plan_tier', { length: 50 }).notNull().default('starter'),
+    planTier: varchar('plan_tier', { length: 50 }).notNull().default('developer'),
     /** AI inference backend: anthropic | local */
     aiProvider: varchar('ai_provider', { length: 50 }).notNull().default('local'),
     /** Model id for the selected provider */
@@ -263,6 +269,10 @@ export const violations = pgTable(
     standard: varchar('standard', { length: 20 }).notNull().default('WCAG22'),
     /** Dedup key within a scan — SHA-based fingerprint from scanner */
     fingerprint: varchar('fingerprint', { length: 64 }),
+    /** confirmed = hard fail; potential = heuristic; needs_manual = incomplete / cannot auto-verify */
+    reviewStatus: violationReviewStatusEnum('review_status').notNull().default('confirmed'),
+    /** Structured extras: contrast, link, frame, image classification */
+    metadata: jsonb('metadata').$type<Record<string, unknown>>(),
     aiFix: text('ai_fix'),
     aiExplanation: text('ai_explanation'),
     aiAltText: text('ai_alt_text'),
@@ -272,6 +282,7 @@ export const violations = pgTable(
     orgIdx: index('violations_org_idx').on(table.organisationId),
     scanIdx: index('violations_scan_idx').on(table.scanId),
     ruleIdx: index('violations_rule_idx').on(table.ruleId),
+    reviewStatusIdx: index('violations_review_status_idx').on(table.reviewStatus),
     scanFingerprintUnique: uniqueIndex('violations_scan_fingerprint_uidx').on(
       table.scanId,
       table.fingerprint,
@@ -504,13 +515,21 @@ export const waitlistSignups = pgTable(
     company: varchar('company', { length: 255 }).notNull(),
     companySize: varchar('company_size', { length: 50 }).notNull(),
     phone: varchar('phone', { length: 20 }),
+    /** Ops inbox: new | contacted | converted | closed */
+    status: varchar('status', { length: 32 }).notNull().default('new'),
+    adminNotes: text('admin_notes'),
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' })
       .notNull()
       .defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date().toISOString()),
   },
   (table) => ({
     emailIdx: index('waitlist_signups_email_idx').on(table.email),
     createdIdx: index('waitlist_signups_created_idx').on(table.createdAt),
+    statusIdx: index('waitlist_signups_status_idx').on(table.status),
   }),
 );
 
@@ -722,6 +741,82 @@ export const documentViolationsRelations = relations(documentViolations, ({ one 
 export const widgetAnalyticsDailyRelations = relations(widgetAnalyticsDaily, ({ one }) => ({
   organisation: one(organisations, {
     fields: [widgetAnalyticsDaily.organisationId],
+    references: [organisations.id],
+  }),
+}));
+
+// ─── India revenue model: engagements + funnel + enterprise quotes ───────────
+
+/** Expert-services / compliance engagement tracked in the portal */
+export const serviceEngagements = pgTable(
+  'service_engagements',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    organisationId: orgId(),
+    type: varchar('type', { length: 64 }).notNull(),
+    title: varchar('title', { length: 255 }).notNull(),
+    status: varchar('status', { length: 32 }).notNull().default('requested'),
+    dueAt: timestamp('due_at', { withTimezone: true, mode: 'string' }),
+    assetId: uuid('asset_id').references(() => assets.id, { onDelete: 'set null' }),
+    scanId: uuid('scan_id').references(() => scans.id, { onDelete: 'set null' }),
+    notes: text('notes'),
+    metadata: jsonb('metadata').$type<Record<string, unknown>>(),
+    ...timestamps,
+  },
+  (table) => ({
+    orgIdx: index('service_engagements_org_idx').on(table.organisationId),
+    statusIdx: index('service_engagements_status_idx').on(table.status),
+  }),
+);
+
+/** Anonymous / authenticated funnel events (free scan → upgrade / sales) */
+export const funnelEvents = pgTable(
+  'funnel_events',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    event: varchar('event', { length: 64 }).notNull(),
+    path: varchar('path', { length: 255 }),
+    meta: jsonb('meta').$type<Record<string, unknown>>(),
+    organisationId: uuid('organisation_id').references(() => organisations.id, {
+      onDelete: 'set null',
+    }),
+    ...timestamps,
+  },
+  (table) => ({
+    eventIdx: index('funnel_events_event_idx').on(table.event),
+    createdIdx: index('funnel_events_created_idx').on(table.createdAt),
+  }),
+);
+
+/** Enterprise programme quote requests */
+export const enterpriseQuotes = pgTable(
+  'enterprise_quotes',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    organisationId: uuid('organisation_id').references(() => organisations.id, {
+      onDelete: 'set null',
+    }),
+    contactName: varchar('contact_name', { length: 255 }).notNull(),
+    contactEmail: varchar('contact_email', { length: 255 }).notNull(),
+    company: varchar('company', { length: 255 }).notNull(),
+    domainsCount: integer('domains_count').notNull().default(1),
+    appsCount: integer('apps_count').notNull().default(0),
+    docsVolume: varchar('docs_volume', { length: 64 }),
+    sebiRequired: boolean('sebi_required').notNull().default(false),
+    trainingSeats: integer('training_seats').notNull().default(0),
+    slaHours: integer('sla_hours').notNull().default(72),
+    notes: text('notes'),
+    status: varchar('status', { length: 32 }).notNull().default('new'),
+    ...timestamps,
+  },
+  (table) => ({
+    emailIdx: index('enterprise_quotes_email_idx').on(table.contactEmail),
+  }),
+);
+
+export const serviceEngagementsRelations = relations(serviceEngagements, ({ one }) => ({
+  organisation: one(organisations, {
+    fields: [serviceEngagements.organisationId],
     references: [organisations.id],
   }),
 }));
