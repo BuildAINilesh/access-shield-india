@@ -254,8 +254,15 @@ export interface DashboardDict {
     issues: string;
     reports: string;
     certificates: string;
+    engagements: string;
     settings: string;
     platformAdmin: string;
+    adminSection: string;
+    adminOverview: string;
+    adminUsers: string;
+    adminOrganisations: string;
+    adminBilling: string;
+    adminInquiries: string;
   };
   topBar: {
     searchPlaceholder: string;
@@ -540,7 +547,7 @@ export interface PricingDict {
       title: string;
       rows: Array<{
         feature: string;
-        starter: string;
+        developer: string;
         professional: string;
         enterprise: string;
       }>;

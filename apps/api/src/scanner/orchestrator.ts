@@ -53,6 +53,7 @@ const listViolationsSchema = z.object({
   severity: z.enum(['critical', 'serious', 'moderate', 'minor']).optional(),
   wcag_criterion: z.string().optional(),
   standard: z.enum(['WCAG22', 'IS17802', 'GIGW3', 'SEBI']).optional(),
+  review_status: z.enum(['confirmed', 'potential', 'needs_manual']).optional(),
 });
 
 /** RabbitMQ connection state for cancel queue only */
@@ -611,7 +612,7 @@ export function createScannerRouter(db: Database, redis: Redis): ExpressRouter {
           return;
         }
 
-        const { page, limit, severity, wcag_criterion, standard } = parseResult.data;
+        const { page, limit, severity, wcag_criterion, standard, review_status } = parseResult.data;
         const offset = (page - 1) * limit;
 
         const [scanCheck] = await db
@@ -639,6 +640,10 @@ export function createScannerRouter(db: Database, redis: Redis): ExpressRouter {
           conditions.push(eq(violations.standard, standard));
         }
 
+        if (review_status) {
+          conditions.push(eq(violations.reviewStatus, review_status));
+        }
+
         const [totalResult] = await db
           .select({ count: count() })
           .from(violations)
@@ -662,6 +667,8 @@ export function createScannerRouter(db: Database, redis: Redis): ExpressRouter {
             html: violations.html,
             pageUrl: violations.pageUrl,
             standard: violations.standard,
+            reviewStatus: violations.reviewStatus,
+            metadata: violations.metadata,
             createdAt: violations.createdAt,
             issueId: issues.id,
           })
