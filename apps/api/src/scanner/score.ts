@@ -79,7 +79,7 @@ export function calculateScore(violations: RawViolation[], _pagesScanned: number
   const minorWeight = SEVERITY_WEIGHTS.minor ?? 1;
   for (const [severity, count] of Object.entries(counts)) {
     if (count === 0) continue;
-    totalDeduction += Math.sqrt(count) * (SEVERITY_WEIGHTS[severity] ?? minorWeight);
+    totalDeduction += Math.sqrt(count) * (SEVERITY_WEIGHTS[severity] ?? 1);
   }
 
   totalDeduction = Math.min(totalDeduction, MAX_SCORE);
