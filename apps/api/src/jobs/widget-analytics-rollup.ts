@@ -6,12 +6,7 @@
 import type { Database } from '@accessshield/db';
 import type { Redis } from 'ioredis';
 import { logger } from '../lib/logger';
-import {
-  daysAgoUtc,
-  parseField,
-  REDIS_HOT_DAYS,
-  upsertDailyRow,
-} from '../lib/widget-analytics';
+import { daysAgoUtc, parseField, REDIS_HOT_DAYS, upsertDailyRow } from '../lib/widget-analytics';
 
 const LOCK_KEY = 'widget-analytics-rollup-lock';
 const LOCK_TTL_SECONDS = 55 * 60;

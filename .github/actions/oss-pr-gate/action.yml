@@ -1,0 +1,154 @@
+name: AccessibleNow OSS PR Gate
+description: >
+  Scan package.json dependency changes against the AccessibleNow a11y intelligence
+  database (AN-F002). Posts a PR comment and can fail the check on severity.
+author: AccessibleNow
+
+branding:
+  icon: shield
+  color: purple
+
+inputs:
+  api-url:
+    description: AccessibleNow API base URL (no trailing slash), e.g. https://api.accessshield.in
+    required: true
+  fail-on:
+    description: Fail the job if any issue at or above this severity (critical|high|medium|low). Empty = never fail.
+    required: false
+    default: high
+  package-json-paths:
+    description: >
+      Space-separated package.json paths to scan. If empty, auto-detects files
+      changed vs the PR base (or scans ./package.json on push).
+    required: false
+    default: ''
+  include-dev:
+    description: Include devDependencies in the scan (true|false)
+    required: false
+    default: 'true'
+  comment:
+    description: Post or update a sticky PR comment (true|false)
+    required: false
+    default: 'true'
+  github-token:
+    description: Token used to post PR comments
+    required: false
+    default: ${{ github.token }}
+
+outputs:
+  risk-score:
+    description: Max risk score across scanned manifests (0–100)
+    value: ${{ steps.scan.outputs.risk-score }}
+  issue-count:
+    description: Total matched a11y package issues
+    value: ${{ steps.scan.outputs.issue-count }}
+  failed:
+    description: Whether the fail-on threshold was breached (true|false)
+    value: ${{ steps.scan.outputs.failed }}
+  comment-body-path:
+    description: Path to the generated markdown comment body
+    value: ${{ steps.scan.outputs.comment-body-path }}
+
+runs:
+  using: composite
+  steps:
+    - name: Detect package.json paths
+      id: paths
+      shell: bash
+      env:
+        INPUT_PATHS: ${{ inputs.package-json-paths }}
+      run: |
+        set -euo pipefail
+        if [ -n "${INPUT_PATHS}" ]; then
+          echo "paths=${INPUT_PATHS}" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        paths=""
+        if [ "${{ github.event_name }}" = "pull_request" ]; then
+          base="${{ github.event.pull_request.base.sha }}"
+          head="${{ github.event.pull_request.head.sha }}"
+          paths=$(git diff --name-only --diff-filter=ACMR "$base...$head" -- '**/package.json' 'package.json' 2>/dev/null || true)
+        else
+          if [ -f package.json ]; then
+            paths="package.json"
+          fi
+        fi
+
+        # Fallback: root package.json if nothing detected
+        if [ -z "${paths}" ] && [ -f package.json ]; then
+          paths="package.json"
+        fi
+
+        # Collapse newlines to spaces for the next step
+        paths_one_line=$(echo "$paths" | tr '\n' ' ' | xargs)
+        echo "paths=${paths_one_line}" >> "$GITHUB_OUTPUT"
+        echo "Detected package.json paths: ${paths_one_line:-<none>}"
+
+    - name: Run OSS scan
+      id: scan
+      shell: bash
+      env:
+        ACCESSIBLENOW_API_URL: ${{ inputs.api-url }}
+        FAIL_ON: ${{ inputs.fail-on }}
+        INCLUDE_DEV: ${{ inputs.include-dev }}
+        PACKAGE_JSON_PATHS: ${{ steps.paths.outputs.paths }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
+        GITHUB_SHA: ${{ github.sha }}
+      run: |
+        set -euo pipefail
+        if [ -z "${PACKAGE_JSON_PATHS:-}" ]; then
+          echo "No package.json files to scan — skipping."
+          echo "risk-score=0" >> "$GITHUB_OUTPUT"
+          echo "issue-count=0" >> "$GITHUB_OUTPUT"
+          echo "failed=false" >> "$GITHUB_OUTPUT"
+          echo "comment-body-path=" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+        node "${{ github.action_path }}/scan.mjs"
+
+    - name: Write job summary
+      if: steps.scan.outputs.comment-body-path != ''
+      shell: bash
+      run: |
+        cat "${{ steps.scan.outputs.comment-body-path }}" >> "$GITHUB_STEP_SUMMARY"
+
+    - name: Post sticky PR comment
+      if: ${{ inputs.comment == 'true' && github.event_name == 'pull_request' && steps.scan.outputs.comment-body-path != '' }}
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ inputs.github-token }}
+        script: |
+          const fs = require('fs');
+          const path = '${{ steps.scan.outputs.comment-body-path }}';
+          const marker = '<!-- accessiblenow-oss-pr-gate -->';
+          const body = fs.readFileSync(path, 'utf8');
+          const { data: comments } = await github.rest.issues.listComments({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+            per_page: 100,
+          });
+          const existing = comments.find((c) => c.body?.includes(marker));
+          if (existing) {
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: existing.id,
+              body,
+            });
+          } else {
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });
+          }
+
+    - name: Enforce fail-on threshold
+      if: steps.scan.outputs.failed == 'true'
+      shell: bash
+      run: |
+        echo "::error::AccessibleNow OSS PR Gate failed — accessibility risks at or above '${{ inputs.fail-on }}' severity."
+        exit 1

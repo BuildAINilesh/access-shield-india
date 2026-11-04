@@ -1,0 +1,18 @@
+{
+  "name": "@accessiblenow/figma-plugin",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AccessibleNow Figma plugin — WCAG 2.2 contrast check (AN-F010)",
+  "scripts": {
+    "build": "node build.mjs",
+    "watch": "node build.mjs --watch",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@figma/plugin-typings": "^1.100.0",
+    "esbuild": "^0.23.0",
+    "typescript": "^5.5.2",
+    "vitest": "^1.6.0"
+  }
+}

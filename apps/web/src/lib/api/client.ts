@@ -10,6 +10,7 @@ import type {
   ScanDetail,
   ScanListItem,
   ViolationRow,
+  IssueSummary,
   DocumentScanJob,
   DocumentScanResult,
   DocumentScanListItem,
@@ -203,6 +204,22 @@ export async function listViolations(
   return { rows: response.data, meta: response.meta };
 }
 
+/** Grouped plain-language issue cards for a completed scan */
+export async function listIssueSummaries(
+  token: string,
+  scanId: string,
+  params?: { severity?: string; standard?: string },
+): Promise<IssueSummary[]> {
+  const search = new URLSearchParams();
+  if (params?.severity) search.set('severity', params.severity);
+  if (params?.standard && params.standard !== 'all') search.set('standard', params.standard);
+
+  const query = search.toString();
+  const path = `/api/v1/scans/${scanId}/issue-summaries${query ? `?${query}` : ''}`;
+  const response = await apiFetch<ApiResponse<IssueSummary[]>>(path, token);
+  return response.data;
+}
+
 /** Request cancellation of a pending or running scan */
 export async function cancelScan(token: string, scanId: string): Promise<void> {
   await apiFetch<ApiResponse<{ message: string }>>(`/api/v1/scans/${scanId}/cancel`, token, {
@@ -254,6 +271,51 @@ export async function downloadReportFile(reportId: string, filename: string): Pr
   anchor.download = filename;
   anchor.click();
   URL.revokeObjectURL(objectUrl);
+}
+
+/**
+ * Generate every report type for a scan and download them as one ZIP.
+ * Each report is also saved individually in the Reports list.
+ * Returns how many reports were included in the bundle.
+ */
+export async function downloadAllReports(input: {
+  assetId: string;
+  scanId: string;
+  format: 'pdf' | 'html';
+}): Promise<{ included: number | null }> {
+  const token = await getAccessToken();
+
+  const response = await fetch(apiUrl('/api/v1/reports/download-all'), {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      asset_id: input.assetId,
+      scan_id: input.scanId,
+      format: input.format,
+    }),
+  });
+
+  if (!response.ok) {
+    const problem = (await response.json().catch(() => null)) as { detail?: string } | null;
+    throw new Error(problem?.detail ?? 'Failed to generate the reports bundle');
+  }
+
+  const disposition = response.headers.get('Content-Disposition') ?? '';
+  const filename = /filename="([^"]+)"/.exec(disposition)?.[1] ?? 'AccessibleNow-Reports.zip';
+  const includedHeader = response.headers.get('X-Reports-Included');
+
+  const blob = await response.blob();
+  const objectUrl = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = objectUrl;
+  anchor.download = filename;
+  anchor.click();
+  URL.revokeObjectURL(objectUrl);
+
+  return { included: includedHeader ? Number(includedHeader) : null };
 }
 
 /** Check API health (no auth required) */

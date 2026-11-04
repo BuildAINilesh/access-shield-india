@@ -34,7 +34,7 @@ export function parseMobileAssetMetadata(
           platform: parsed.platform,
           appS3Key: parsed.appS3Key,
           maxScreens: parsed.maxScreens ?? 50,
-          standards: parsed.standards ?? ['WCAG22', 'IS17802'],
+          standards: parsed.standards ?? ['WCAG22'],
           userDescription: parsed.userDescription,
         };
       }
@@ -52,6 +52,6 @@ export function parseMobileAssetMetadata(
     platform: match[1] as 'android' | 'ios',
     appS3Key: '',
     maxScreens: 50,
-    standards: ['WCAG22', 'IS17802'],
+    standards: ['WCAG22'],
   };
 }

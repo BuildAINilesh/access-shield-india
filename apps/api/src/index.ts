@@ -20,8 +20,15 @@ import { createAssetsRouter } from './routes/assets';
 import { createBillingRouter } from './routes/billing';
 import { createDashboardRouter } from './routes/dashboard';
 import { createHealthRouter } from './routes/health';
+import { createCodeRouter } from './routes/code';
+import { createFixesRouter } from './routes/fixes';
 import { createIntegrationsRouter } from './routes/integrations';
+import { createIntelligenceRouter } from './routes/intelligence';
 import { createIssuesRouter } from './routes/issues';
+import { createDynamicRouter } from './routes/dynamic';
+import { createLearnAuthRouter, createLearnPublicRouter } from './routes/learn';
+import { createOssRouter } from './routes/oss';
+import { createWebhooksRouter } from './routes/webhooks';
 import { createNotificationsRouter } from './routes/notifications';
 import { createOrganisationRouter } from './routes/organisation';
 import { createUsersRouter } from './routes/users';
@@ -33,6 +40,7 @@ import { createPublicSignupRouter } from './routes/public-signup';
 import { createAdminRouter } from './routes/admin';
 import { createDocumentScansRouter } from './routes/document-scans';
 import { createRealtimeRouter } from './routes/realtime';
+import { startSlackDigestJob } from './jobs/slack-digest';
 import { startWidgetAnalyticsRollupJob } from './jobs/widget-analytics-rollup';
 
 const PORT = Number(process.env.PORT ?? 4000);
@@ -121,6 +129,17 @@ async function bootstrap() {
   const publicWidgetRouter = createPublicWidgetRouter(db, redis);
   app.use('/api/v1/widget', publicWidgetRouter);
 
+  // AN OSS + Intelligence — public so @accessiblenow/scan CLI works without JWT
+  const ossRouter = createOssRouter(db, redis);
+  app.use('/api/v1/oss', ossRouter);
+
+  const intelligenceRouter = createIntelligenceRouter(db);
+  app.use('/api/v1/intelligence', intelligenceRouter);
+
+  // AN Learn catalog is public; progress mounts after auth below
+  const learnPublicRouter = createLearnPublicRouter(db);
+  app.use('/api/v1/learn', learnPublicRouter);
+
   const authMiddleware = createAuthMiddleware(secrets, db);
   app.use('/api/v1', authMiddleware);
 
@@ -167,6 +186,21 @@ async function bootstrap() {
   const integrationsRouter = createIntegrationsRouter(db);
   app.use('/api/v1/integrations', integrationsRouter);
 
+  const codeRouter = createCodeRouter(db);
+  app.use('/api/v1/code', codeRouter);
+
+  const fixesRouter = createFixesRouter(db);
+  app.use('/api/v1/fixes', fixesRouter);
+
+  const webhooksRouter = createWebhooksRouter(db);
+  app.use('/api/v1/webhooks', webhooksRouter);
+
+  const learnAuthRouter = createLearnAuthRouter(db);
+  app.use('/api/v1/learn', learnAuthRouter);
+
+  const dynamicRouter = createDynamicRouter(db);
+  app.use('/api/v1/dynamic', dynamicRouter);
+
   const adminRouter = createAdminRouter(db, secrets, redis);
   app.use('/api/v1/admin', adminRouter);
 
@@ -184,6 +218,7 @@ async function bootstrap() {
   await redis.connect();
 
   const stopAnalyticsRollup = startWidgetAnalyticsRollupJob(db, redis);
+  const stopSlackDigest = startSlackDigestJob(db, redis);
 
   const server = app.listen(PORT, () => {
     logger.info({ port: PORT, version: process.env.npm_package_version }, 'API server started');
@@ -205,6 +240,7 @@ async function bootstrap() {
     logger.info('Shutting down gracefully...');
     server.close();
     stopAnalyticsRollup();
+    stopSlackDigest();
     await redis.quit();
     await closeRabbitMQ();
     logger.info('Shutdown complete');

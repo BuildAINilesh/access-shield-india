@@ -8,10 +8,7 @@ import type { ConsumeMessage } from 'amqplib';
 import { createDb, type Database, violations } from '@accessshield/db';
 import type { FindingsPersistQueueMessage } from '@accessshield/types';
 import { logger } from '../../lib/logger';
-import {
-  tryFinalizeScanFromPageJobs,
-  updateProgressFromPageJobs,
-} from './finalize-from-page-jobs';
+import { tryFinalizeScanFromPageJobs, updateProgressFromPageJobs } from './finalize-from-page-jobs';
 import { findingsPersistQueueMessageSchema } from './message-schemas';
 import { markScanPageJobStatus } from './page-jobs';
 import { enqueuePostFinalizeJobs } from './post-finalize';
@@ -97,24 +94,27 @@ export async function startFindingsPersistWorker(): Promise<void> {
   await channel.assertQueue(SCAN_PIPELINE_V2_QUEUES.FINDINGS_PERSIST, { durable: true });
   await channel.prefetch(2);
 
-  await channel.consume(SCAN_PIPELINE_V2_QUEUES.FINDINGS_PERSIST, async (msg: ConsumeMessage | null) => {
-    if (!msg) return;
-    try {
-      const parsed = findingsPersistQueueMessageSchema.safeParse(
-        JSON.parse(msg.content.toString()) as unknown,
-      );
-      if (!parsed.success) {
-        logger.error({ errors: parsed.error.flatten() }, 'Invalid findings.persist message');
+  await channel.consume(
+    SCAN_PIPELINE_V2_QUEUES.FINDINGS_PERSIST,
+    async (msg: ConsumeMessage | null) => {
+      if (!msg) return;
+      try {
+        const parsed = findingsPersistQueueMessageSchema.safeParse(
+          JSON.parse(msg.content.toString()) as unknown,
+        );
+        if (!parsed.success) {
+          logger.error({ errors: parsed.error.flatten() }, 'Invalid findings.persist message');
+          channel.ack(msg);
+          return;
+        }
+        await processFindingsPersist(parsed.data);
         channel.ack(msg);
-        return;
+      } catch (err) {
+        logger.error({ err }, 'findings.persist handler error');
+        channel.ack(msg);
       }
-      await processFindingsPersist(parsed.data);
-      channel.ack(msg);
-    } catch (err) {
-      logger.error({ err }, 'findings.persist handler error');
-      channel.ack(msg);
-    }
-  });
+    },
+  );
 
   logger.info(
     { queue: SCAN_PIPELINE_V2_QUEUES.FINDINGS_PERSIST },

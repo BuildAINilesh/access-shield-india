@@ -368,7 +368,7 @@ function determineConformanceLevel(
 function generateRemarks(
   criterion: string,
   violations: ViolationSummary[],
-  pagesScanned: number,
+  _pagesScanned: number,
 ): string {
   const criterionViolations = violations.filter((v) => v.wcagCriterion === criterion);
 

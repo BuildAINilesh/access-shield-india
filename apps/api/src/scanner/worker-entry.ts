@@ -18,10 +18,7 @@ loadLocalEnv();
 
 import { logger } from '../lib/logger';
 import { shutdown, startWorker } from './worker';
-import {
-  isScanPipelineV2Enabled,
-  isScanPipelineV2ScanJobsEnabled,
-} from './v2/queues';
+import { isScanPipelineV2Enabled, isScanPipelineV2ScanJobsEnabled } from './v2/queues';
 import { shutdownPageScanWorker, startPageScanWorker } from './v2/page-scan-worker';
 import {
   shutdownFindingsPersistWorker,
@@ -39,16 +36,21 @@ import {
   startReportGenerateWorker,
 } from './v2/report-generate-worker';
 
+import { startSlackDigestJob } from '../jobs/slack-digest';
 import { startWidgetAnalyticsRollupJob } from '../jobs/widget-analytics-rollup';
 import { createDb } from '@accessshield/db';
 import Redis from 'ioredis';
+import { shutdownJourneyWorker, startJourneyWorker } from './journey-worker';
 
 logger.info('Starting AccessShield scan worker...');
 
 let stopAnalyticsRollup: (() => void) | null = null;
+let stopSlackDigest: (() => void) | null = null;
 
 const gracefulShutdown = async () => {
   stopAnalyticsRollup?.();
+  stopSlackDigest?.();
+  await shutdownJourneyWorker();
   if (isScanPipelineV2Enabled()) {
     await shutdownCrawlerWorker();
     await shutdownPageScanWorker();
@@ -73,6 +75,8 @@ async function main(): Promise<void> {
     const redis = new Redis(redisUrl, { maxRetriesPerRequest: 3, lazyConnect: true });
     await redis.connect();
     stopAnalyticsRollup = startWidgetAnalyticsRollupJob(db, redis);
+    stopSlackDigest = startSlackDigestJob(db, redis);
+    await startJourneyWorker(db);
   }
 
   if (isScanPipelineV2Enabled()) {

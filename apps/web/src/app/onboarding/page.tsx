@@ -57,7 +57,7 @@ export default function OnboardingPage() {
     defaultValues: {
       standards: {
         wcag22: true,
-        is17802: true,
+        is17802: false,
         gigw3: false,
         sebi: false,
       },

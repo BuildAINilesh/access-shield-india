@@ -137,7 +137,7 @@ export interface BrowserStackCapabilities {
 }
 
 export const DEFAULT_MOBILE_SCAN_CONFIG: Partial<MobileScanConfig> = {
-  standards: ['WCAG22', 'IS17802'],
+  standards: ['WCAG22'],
   maxScreens: 50,
 };
 

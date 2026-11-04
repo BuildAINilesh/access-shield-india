@@ -15,6 +15,7 @@ import {
   PanelLeftClose,
   PanelLeft,
   FileStack,
+  Route,
 } from 'lucide-react';
 import type { UserRole } from '@accessshield/types';
 import { BrandLogo } from '@/components/brand/BrandLogo';
@@ -27,6 +28,7 @@ type NavLabelKey =
   | 'assets'
   | 'scans'
   | 'documentScanner'
+  | 'journeys'
   | 'issues'
   | 'reports'
   | 'certificates'
@@ -50,6 +52,7 @@ const NAV_ITEMS: NavItem[] = [
     icon: FileStack,
     badge: new Date() < new Date('2026-10-01') ? 'New' : undefined,
   },
+  { href: '/dashboard/journeys', labelKey: 'journeys', icon: Route },
   { href: '/dashboard/issues', labelKey: 'issues', icon: AlertCircle },
   { href: '/dashboard/reports', labelKey: 'reports', icon: FileText },
   { href: '/dashboard/certs', labelKey: 'certificates', icon: Award },

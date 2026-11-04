@@ -5,6 +5,7 @@ export interface Dictionary {
   auth: AuthDict;
   pages: PagesDict;
   pricing: PricingDict;
+  features: FeaturesDict;
 }
 
 export interface CommonDict {
@@ -13,9 +14,11 @@ export interface CommonDict {
     mainAria: string;
     home: string;
     services: string;
+    features: string;
     widget: string;
     documentScanner: string;
     blog: string;
+    pricing: string;
     scan: string;
     signIn: string;
     startTrial: string;
@@ -47,6 +50,7 @@ export interface CommonDict {
       sebi: string;
       freeScan: string;
       services: string;
+      features: string;
       widget: string;
       documentScanner: string;
       docs: string;
@@ -167,6 +171,82 @@ export interface HomeDict {
     scanCta: string;
     expertCta: string;
   };
+  storyCarousel: {
+    title: string;
+    subtitle: string;
+    regionAria: string;
+    pause: string;
+    play: string;
+    previous: string;
+    next: string;
+    /** "{n}" and "{title}" are replaced at runtime. */
+    goTo: string;
+    /** "{current}" and "{total}" are replaced at runtime. */
+    slideOf: string;
+    slides: {
+      id: 'screenReader' | 'lowVision' | 'keyboard' | 'deaf' | 'compliance';
+      eyebrow: string;
+      title: string;
+      body: string;
+      stat: string;
+      statLabel: string;
+      imageAlt: string;
+      cta: string;
+      href: string;
+    }[];
+  };
+  heroScan: {
+    label: string;
+    placeholder: string;
+    submit: string;
+    invalidUrl: string;
+    hint: string;
+  };
+  simulator: {
+    title: string;
+    subtitle: string;
+    groupAria: string;
+    previewTitle: string;
+    previewAmount: string;
+    previewStatusLabel: string;
+    previewPay: string;
+    modes: {
+      id: 'normal' | 'lowVision' | 'colourBlind' | 'cataract';
+      label: string;
+      insight: string;
+    }[];
+    cta: string;
+  };
+  calculator: {
+    title: string;
+    subtitle: string;
+    visitorsLabel: string;
+    orderLabel: string;
+    resultLabel: string;
+    resultNote: string;
+    legalLabel: string;
+    legalValue: string;
+    legalNote: string;
+    cta: string;
+  };
+  quiz: {
+    title: string;
+    subtitle: string;
+    yes: string;
+    no: string;
+    questions: { id: 'sebi' | 'government' | 'public'; question: string }[];
+    resultTitle: string;
+    resultPending: string;
+    resultNone: string;
+    laws: {
+      id: 'rpwd' | 'sebi' | 'gigw' | 'is17802';
+      name: string;
+      reason: string;
+      href: string;
+    }[];
+    learnMore: string;
+    cta: string;
+  };
 }
 
 export interface DashboardDict {
@@ -178,6 +258,7 @@ export interface DashboardDict {
     assets: string;
     scans: string;
     documentScanner: string;
+    journeys: string;
     issues: string;
     reports: string;
     certificates: string;
@@ -222,6 +303,13 @@ export interface PagesDict {
   widget: PageContent;
   documentScanner: PageContent;
   services: PageContent;
+  servicesHub: ServicesHubContent;
+  accessibilityAuditing: AccessibilityAuditingContent;
+  accessibilityConsulting: AccessibilityConsultingContent;
+  accessibilityTraining: AccessibilityTrainingContent;
+  complianceReports: ComplianceReportsContent;
+  accessibilityTesting: AccessibilityTestingContent;
+  multilingualAccessibility: MultilingualAccessibilityContent;
   docs: PageContent;
   careers: PageContent;
   waitlist: PageContent;
@@ -251,8 +339,241 @@ export interface GuidePageContent extends PageContent {
   badges?: string[];
 }
 
+export interface ServicesHubContent {
+  meta: { title: string; description: string };
+  hero: {
+    title: string;
+    subtitle: string;
+    primaryCta: string;
+    secondaryCta: string;
+  };
+  servicesGrid: Array<{
+    id: string;
+    name: string;
+    description: string;
+    href: string;
+  }>;
+  whyIndia: {
+    title: string;
+    stats: Array<{ value: string; label: string }>;
+  };
+}
+
+export interface AccessibilityAuditingContent {
+  meta: { title: string; description: string };
+  hero: { title: string; subtitle: string };
+  whatCovered: {
+    title: string;
+    automated: { title: string; items: string[] };
+    manual: { title: string; items: string[] };
+  };
+  process: {
+    title: string;
+    steps: Array<{ step: string; title: string; description: string }>;
+  };
+  deliverables: {
+    title: string;
+    items: string[];
+  };
+  pricing: {
+    automated: string;
+    certification: string;
+    linkText: string;
+  };
+  faq: {
+    title: string;
+    questions: Array<{ question: string; answer: string }>;
+  };
+}
+
+export interface AccessibilityConsultingContent {
+  meta: { title: string; description: string };
+  hero: { title: string; subtitle: string };
+  tracks: {
+    title: string;
+    items: Array<{ id: string; title: string; description: string }>;
+  };
+  howItWorks: {
+    title: string;
+    steps: string[];
+  };
+  team: {
+    title: string;
+    description: string;
+  };
+  cta: {
+    title: string;
+    description: string;
+  };
+}
+
+export interface AccessibilityTrainingContent {
+  meta: { title: string; description: string };
+  hero: { title: string; subtitle: string };
+  catalogue: {
+    title: string;
+    items: Array<{
+      id: string;
+      title: string;
+      duration: string;
+      price: string;
+      capacity: string;
+      description: string;
+    }>;
+  };
+  format: {
+    title: string;
+    items: string[];
+  };
+  whoFor: {
+    title: string;
+    roles: string[];
+  };
+  bundle: {
+    text: string;
+    linkText: string;
+  };
+}
+
+export interface ComplianceReportsContent {
+  meta: { title: string; description: string };
+  hero: { title: string; subtitle: string };
+  catalogue: {
+    title: string;
+    reports: Array<{
+      id: string;
+      title: string;
+      description: string;
+      includedIn: string;
+    }>;
+  };
+  howGenerated: {
+    title: string;
+    description: string;
+  };
+  sample: {
+    title: string;
+    description: string;
+    ctaText: string;
+  };
+}
+
+export interface AccessibilityTestingContent {
+  meta: { title: string; description: string };
+  hero: { title: string; subtitle: string };
+  layers: {
+    title: string;
+    subtitle: string;
+    items: Array<{
+      layer: string;
+      title: string;
+      description: string;
+    }>;
+  };
+  whySebi: {
+    title: string;
+    description: string;
+  };
+  mobileDocuments: {
+    title: string;
+    description: string;
+  };
+}
+
+export interface MultilingualAccessibilityContent {
+  meta: { title: string; description: string };
+  hero: { title: string; subtitle: string };
+  problem: {
+    title: string;
+    description: string;
+    example: {
+      wrong: string;
+      right: string;
+    };
+  };
+  whatWeProvide: {
+    title: string;
+    items: Array<{
+      id: string;
+      title: string;
+      description: string;
+    }>;
+  };
+  languageCoverage: {
+    title: string;
+    columns: string[];
+    rows: Array<{
+      language: string;
+      widget: string;
+      scanner: string;
+    }>;
+  };
+}
+
 export interface PricingDict {
   page: { title: string; description: string; eyebrow: string };
+  hero: {
+    title: string;
+    subtitle: string;
+  };
+  oneTime: {
+    title: string;
+    badge: string;
+    product: {
+      name: string;
+      price: string;
+      description: string;
+      features: string[];
+      cta: string;
+    };
+  };
+  subscriptions: {
+    title: string;
+    billingToggle: {
+      monthly: string;
+      annual: string;
+      save: string;
+    };
+    plans: Array<{
+      id: string;
+      name: string;
+      badge: string | null;
+      monthlyPrice: string;
+      annualPrice: string | null;
+      description: string;
+      features: string[];
+      cta: string;
+    }>;
+    comparisonTable: {
+      title: string;
+      rows: Array<{
+        feature: string;
+        starter: string;
+        professional: string;
+        enterprise: string;
+      }>;
+    };
+  };
+  addOns: {
+    title: string;
+    items: Array<{
+      name: string;
+      price: string;
+      description: string;
+    }>;
+  };
+  sebiCallout: {
+    title: string;
+    description: string;
+    cta: string;
+  };
+  faq: {
+    title: string;
+    questions: Array<{
+      question: string;
+      answer: string;
+    }>;
+  };
   sections: {
     auditFirst: string;
     step01: string;
@@ -263,4 +584,61 @@ export interface PricingDict {
   };
   billing: { monthly: string; annual: string; save: string; exclGst: string };
   freeTier: { name: string; description: string; cta: string; signupCta: string };
+}
+
+export interface FeatureItemCopy {
+  name: string;
+  tagline: string;
+  snykParallel: string;
+  summary: string;
+  userStories: string[];
+  capabilities: string[];
+}
+
+export interface FeaturesDict {
+  meta: { title: string; description: string };
+  hub: {
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+    filterAria: string;
+    filterAll: string;
+    filterPhase: string;
+    emptyFilter: string;
+    viewDetails: string;
+  };
+  phases: { 1: string; 2: string; 3: string };
+  status: {
+    available: string;
+    in_progress: string;
+    coming_soon: string;
+  };
+  detail: {
+    backToHub: string;
+    userStoriesHeading: string;
+    capabilitiesHeading: string;
+    phaseLabel: string;
+    statusLabel: string;
+    snykLabel: string;
+  };
+  cta: {
+    waitlist: string;
+    contact: string;
+    freeScan: string;
+    pricing: string;
+  };
+  items: {
+    code: FeatureItemCopy;
+    'open-source': FeatureItemCopy;
+    fix: FeatureItemCopy;
+    'priority-score': FeatureItemCopy;
+    integrations: FeatureItemCopy;
+    dynamic: FeatureItemCopy;
+    intelligence: FeatureItemCopy;
+    learn: FeatureItemCopy;
+    policy: FeatureItemCopy;
+    posture: FeatureItemCopy;
+    analytics: FeatureItemCopy;
+    red: FeatureItemCopy;
+  };
 }

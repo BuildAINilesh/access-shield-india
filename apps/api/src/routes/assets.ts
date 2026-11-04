@@ -190,7 +190,7 @@ export function createAssetsRouter(db: Database): ExpressRouter {
             url,
             type,
             description,
-            standards: standards && standards.length > 0 ? standards : ['WCAG22', 'IS17802'],
+            standards: standards && standards.length > 0 ? standards : ['WCAG22'],
           })
           .returning({
             id: assets.id,
@@ -340,9 +340,9 @@ export function createAssetsRouter(db: Database): ExpressRouter {
                 return null;
               })
               .filter((value): value is 'WCAG22' | 'IS17802' | 'SEBI' => value !== null);
-            return selected.length > 0 ? selected : ['WCAG22', 'IS17802'];
+            return selected.length > 0 ? selected : ['WCAG22'];
           } catch {
-            return ['WCAG22', 'IS17802'];
+            return ['WCAG22'];
           }
         })();
 

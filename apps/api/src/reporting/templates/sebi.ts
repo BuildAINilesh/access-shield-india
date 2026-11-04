@@ -531,9 +531,7 @@ Handlebars.registerHelper('gt', function (a: number, b: number) {
 /**
  * Assess functional areas based on violations
  */
-function assessFunctionalAreas(
-  data: ReportTemplateData,
-): Array<{
+function assessFunctionalAreas(data: ReportTemplateData): Array<{
   name: string;
   status: 'pass' | 'fail' | 'na';
   statusClass: string;

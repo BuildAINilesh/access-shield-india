@@ -79,7 +79,7 @@ export function ScannerTestLab() {
   const [assetUrl, setAssetUrl] = useState('https://dequeuniversity.com/demo/mars/');
   const [scanType, setScanType] = useState<ScanType>('single_page');
   const [wcagLevel, setWcagLevel] = useState<WcagLevel>('AA');
-  const [standards, setStandards] = useState<ComplianceStandard[]>(['WCAG22', 'IS17802']);
+  const [standards, setStandards] = useState<ComplianceStandard[]>(['WCAG22']);
   const [maxPages, setMaxPages] = useState('1');
   const [excludePaths, setExcludePaths] = useState('');
   const [activeScanId, setActiveScanId] = useState<string | null>(null);

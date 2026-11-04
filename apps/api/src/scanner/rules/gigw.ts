@@ -331,7 +331,7 @@ export async function checkLastUpdatedDate(
         for (const time of timeElements) {
           const dateTime = time.getAttribute('datetime');
           const text = time.textContent?.toLowerCase() ?? '';
-          if (dateTime || text.match(/\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}/)) {
+          if (dateTime || text.match(/\d{1,2}[/.-]\d{1,2}[/.-]\d{2,4}/)) {
             return true;
           }
         }

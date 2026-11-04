@@ -306,9 +306,7 @@ async function collectIframeViolations(
     try {
       const results = await runAxeInContext(frame, axeCorePath, axeTags);
       const prefix = `[iframe:${frameUrl}] `;
-      collected.push(
-        ...mapAxeResults(results, config, assetId, pageUrl, seenFingerprints, prefix),
-      );
+      collected.push(...mapAxeResults(results, config, assetId, pageUrl, seenFingerprints, prefix));
       logger.info(
         { pageUrl, frameUrl, violationCount: results.violations.length },
         'RULE-001 axe-core iframe scan complete',

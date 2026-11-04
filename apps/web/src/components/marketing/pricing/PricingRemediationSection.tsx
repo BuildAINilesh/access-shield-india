@@ -1,7 +1,18 @@
 import { ButtonLink } from '@/components/marketing/ButtonLink';
-import { PRICING_CATALOG, type OneTimeSku } from '@/lib/pricing/catalog';
+import {
+  PRICING_CATALOG,
+  formatOneTimePrice,
+  type OneTimeSku,
+  type PricingCurrency,
+} from '@/lib/pricing/catalog';
 
-function OneTimeCard({ service }: { service: OneTimeSku }) {
+function OneTimeCard({
+  service,
+  currency = 'INR',
+}: {
+  service: OneTimeSku;
+  currency?: PricingCurrency;
+}) {
   return (
     <article
       className={`relative flex h-full flex-col rounded-lg border bg-white p-6 shadow-sm ${
@@ -25,8 +36,11 @@ function OneTimeCard({ service }: { service: OneTimeSku }) {
       )}
       <h3 className="text-lg font-bold text-text-primary">{service.name}</h3>
       <p className="mt-1 text-sm text-text-secondary">{service.subtitle}</p>
+      <p className="mt-3 text-2xl font-bold text-primary-600">
+        {formatOneTimePrice(service, currency)}
+      </p>
       {service.priceNote && (
-        <p className="mt-3 text-sm font-medium text-text-primary">{service.priceNote}</p>
+        <p className="mt-2 text-sm font-medium text-text-primary">{service.priceNote}</p>
       )}
       <ul className="mt-4 flex-1 space-y-2">
         {service.features.map((feature) => (
@@ -101,8 +115,8 @@ export function PricingStandaloneAuditSection() {
           Compliance Website Audit &amp; Scan
         </h2>
         <p className="mx-auto mt-3 max-w-2xl text-base leading-normal text-text-secondary">
-          Know exactly where your site stands for users with disabilities — automated WCAG 2.2 + IS
-          17802 scan paired with hands-on specialist review.{' '}
+          Know exactly where your site stands for users with disabilities — automated WCAG 2.2 AA
+          scan paired with hands-on specialist review. Optional India pack on request.{' '}
           <strong className="font-semibold text-text-primary">
             Free for the first 100 customers
           </strong>

@@ -31,12 +31,14 @@ import { PUBLIC_SCANS_ORG_ID } from './public-scan-org';
 import { runAxeWithRetry, getAltTextCandidates, getFixCandidates } from './axe-runner';
 import { createConcurrencyLimit } from './concurrency';
 import { discoverUrlsWithBrowser } from './crawler';
+import { summarisePageScanFailures } from './browser-identity';
 import { createBrowser, scanPage, closeScanContext, closeBrowser } from './playwright-runner';
 import { runGIGWChecks } from './rules/gigw';
 import { runIS17802Rules } from './rules/is17802';
 import { runSebiChecks } from './rules/sebi';
 import { buildScanScoreResult } from './score';
 import type { RawViolation, ScanJobMessage, ScanProgress, ScanCancelMessage } from './types';
+import { deliverWebhookEvent } from '../services/webhooks';
 import { syncIssuesFromViolations } from '../services/issue-sync';
 import { markScanPageJobStatus, upsertScanPageJob } from './v2/page-jobs';
 import { isScanPipelineV2PageWorkerEnabled } from './v2/queues';
@@ -323,7 +325,10 @@ async function processScanJob(message: ScanJobMessage): Promise<void> {
         });
         pageJobIdsByUrl.set(url, id);
       } catch (err) {
-        logger.warn({ err, scanId, url }, 'Failed to upsert scan_page_job (is migration 0005 applied?)');
+        logger.warn(
+          { err, scanId, url },
+          'Failed to upsert scan_page_job (is migration 0005 applied?)',
+        );
       }
     }
 
@@ -513,10 +518,7 @@ async function processScanJob(message: ScanJobMessage): Promise<void> {
     }
 
     if (pagesScanned === 0 && urls.length > 0) {
-      const summary =
-        pageFailureMessages.slice(0, 3).join('; ') ||
-        'No pages could be analyzed. Check site availability and scanner logs.';
-      throw new Error(`All ${urls.length} page(s) failed to scan. ${summary}`.substring(0, 1000));
+      throw new Error(summarisePageScanFailures(urls.length, pageFailureMessages));
     }
 
     const seenFingerprints = new Set<string>();
@@ -664,6 +666,16 @@ async function processScanJob(message: ScanJobMessage): Promise<void> {
       .where(and(eq(assets.id, assetId), eq(assets.organisationId, orgId)));
 
     await clearProgress(scanId);
+
+    void deliverWebhookEvent(db, orgId, 'scan.completed', {
+      scanId,
+      assetId,
+      score: Math.round(scoreResult.score),
+      violationCount: deduplicatedViolations.length,
+      pagesScanned,
+    }).catch((err) => {
+      logger.warn({ err, scanId }, 'scan.completed webhook failed');
+    });
 
     if (orgId === PUBLIC_SCANS_ORG_ID) {
       try {

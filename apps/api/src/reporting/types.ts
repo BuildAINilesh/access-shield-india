@@ -9,12 +9,7 @@ import type { IssueSeverity } from '@accessshield/types';
 
 /** Supported report types */
 export type ReportType =
-  | 'executive'
-  | 'technical'
-  | 'wcag_compliance'
-  | 'legal_rpwd'
-  | 'accessibility_statement'
-  | 'sebi';
+  'executive' | 'technical' | 'wcag_compliance' | 'legal_rpwd' | 'accessibility_statement' | 'sebi';
 
 /** Report output format */
 export type ReportFormat = 'pdf' | 'html';
@@ -151,10 +146,7 @@ export interface ReportRecord {
 
 /** VPAT conformance levels per WCAG 2.2 Section 508 */
 export type ConformanceLevel =
-  | 'Supports'
-  | 'Partially Supports'
-  | 'Does Not Support'
-  | 'Not Applicable';
+  'Supports' | 'Partially Supports' | 'Does Not Support' | 'Not Applicable';
 
 /** WCAG criterion conformance status for VPAT report */
 export interface CriterionConformance {

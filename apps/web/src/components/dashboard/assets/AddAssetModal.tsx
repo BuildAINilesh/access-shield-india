@@ -65,7 +65,7 @@ function standardsFromFlags(flags: StandardFlags): Array<'WCAG22' | 'IS17802' | 
   if (flags.is17802) selected.push('IS17802');
   if (flags.gigw3) selected.push('GIGW3');
   if (flags.sebi) selected.push('SEBI');
-  return selected.length > 0 ? selected : ['WCAG22', 'IS17802'];
+  return selected.length > 0 ? selected : ['WCAG22'];
 }
 
 export function AddAssetModal({ open, onClose }: AddAssetModalProps) {
@@ -85,7 +85,7 @@ export function AddAssetModal({ open, onClose }: AddAssetModalProps) {
       description: '',
       standards: {
         wcag22: true,
-        is17802: true,
+        is17802: false,
         gigw3: false,
         sebi: false,
       },
@@ -102,7 +102,7 @@ export function AddAssetModal({ open, onClose }: AddAssetModalProps) {
       description: '',
       standards: {
         wcag22: true,
-        is17802: true,
+        is17802: false,
         sebi: false,
       },
       maxScreens: 50,
@@ -254,7 +254,11 @@ export function AddAssetModal({ open, onClose }: AddAssetModalProps) {
                 Compliance Standards
               </legend>
               <div className="space-y-2">
-                <RhfCheckbox control={webForm.control} name="standards.wcag22" label="WCAG 2.2 AA" />
+                <RhfCheckbox
+                  control={webForm.control}
+                  name="standards.wcag22"
+                  label="WCAG 2.2 AA"
+                />
                 <RhfCheckbox
                   control={webForm.control}
                   name="standards.is17802"

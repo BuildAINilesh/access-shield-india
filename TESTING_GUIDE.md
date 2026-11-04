@@ -47,7 +47,32 @@ AWS_SECRET_ACCESS_KEY=minioadmin
 JIRA_CLIENT_ID=your-jira-client-id
 JIRA_CLIENT_SECRET=your-jira-client-secret
 JIRA_WEBHOOK_SECRET=your-webhook-secret
+
+# GitHub App — AN Fix Apply (optional; Settings → Integrations → GitHub)
+# Create a GitHub App with Contents: Read & write; set Setup URL to:
+#   {NEXT_PUBLIC_APP_URL}/dashboard/settings/github/callback
+GITHUB_APP_ID=
+GITHUB_APP_SLUG=your-app-slug
+GITHUB_APP_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----\n...\n-----END RSA PRIVATE KEY-----"
+GITHUB_APP_CLIENT_ID=
+GITHUB_APP_CLIENT_SECRET=
+# GITHUB_APP_WEBHOOK_SECRET=  # optional
 ```
+
+### Phase 1 leftovers smoke (Slack / GitHub / Figma)
+
+1. **Migrate:** `pnpm db:migrate` (includes `0014_github_integrations`).
+2. **Slack digest:** Settings → Integrations → create outbound webhook with a `hooks.slack.com` Incoming Webhook URL; enable **Daily digest**. API job posts Block Kit once/UTC day (or trigger `runSlackDigest` in a REPL). Non-Slack URLs still get HMAC JSON.
+3. **GitHub Apply:** Set `GITHUB_APP_*` env, restart API, Connect GitHub App, open an issue AI fix → **Apply fix to GitHub** with `owner/repo` + file path.
+4. **Figma:** `pnpm --filter @accessiblenow/figma-plugin build` → Figma Desktop → Plugins → Development → Import `apps/figma-plugin/manifest.json`.
+
+### Phase 2 — Dynamic journeys smoke (AN-F003)
+
+1. `pnpm db:migrate` (includes `0017_dynamic_journeys`).
+2. Start API + worker (`pnpm --filter @accessshield/api dev` and `dev:worker`) with `RABBITMQ_URL` set.
+3. Portal → **Journeys** → New journey → paste JSON DSL (use `{{creds.username}}` / `{{creds.password}}`) → Save.
+4. Open journey → **Run journey scan** → watch Failure map for step statuses + axe hotspots.
+5. Optional: set `JOURNEY_CREDENTIALS_KEY` (64 hex chars) for a dedicated AES key; otherwise `AUTH_SECRET` is derived.
 
 ### 3. Start Development Servers
 

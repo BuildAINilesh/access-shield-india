@@ -10,10 +10,7 @@ function isDbClaimsFallbackEnabled(): boolean {
   return process.env.NODE_ENV !== 'production' || process.env.AUTH_DB_CLAIMS_FALLBACK === 'true';
 }
 
-function readClaim(
-  payload: JWTPayload,
-  key: 'user_role' | 'org_id',
-): string | undefined {
+function readClaim(payload: JWTPayload, key: 'user_role' | 'org_id'): string | undefined {
   const top = payload[key];
   if (typeof top === 'string' && top.length > 0) {
     return top;

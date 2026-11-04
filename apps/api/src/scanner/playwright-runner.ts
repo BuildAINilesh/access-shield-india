@@ -7,6 +7,15 @@
  */
 
 import { logger } from '../lib/logger';
+import {
+  SCANNER_HTTP_HEADERS,
+  SCANNER_LAUNCH_ARGS,
+  SCANNER_USER_AGENT,
+  SiteBlockedError,
+  applyScannerStealth,
+  isBlockedHttpStatus,
+  looksLikeBlockedPage,
+} from './browser-identity';
 import type { HeadingInfo, LoginConfig, PageScanResult, ScanJobConfig } from './types';
 
 /** Playwright types */
@@ -29,8 +38,8 @@ const MOBILE_VIEWPORT = { width: 375, height: 667 };
 /** Navigation timeout in milliseconds */
 const NAVIGATION_TIMEOUT = 30000;
 
-/** Page load wait time after navigation */
-const PAGE_SETTLE_TIME = 1000;
+/** Page load wait time after navigation (SPAs / delayed WAF interstitials) */
+const PAGE_SETTLE_TIME = 2000;
 
 const SCREENSHOTS_ENABLED = process.env.SCAN_SCREENSHOTS === 'true';
 
@@ -44,14 +53,8 @@ export async function createBrowser(): Promise<Browser> {
   const chromium = await getChromium();
   const browser = await chromium.launch({
     headless: true,
-    args: [
-      '--no-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-setuid-sandbox',
-      '--disable-gpu',
-      '--no-first-run',
-      '--disable-extensions',
-    ],
+    ignoreDefaultArgs: ['--enable-automation'],
+    args: [...SCANNER_LAUNCH_ARGS],
   });
 
   logger.info('Playwright browser launched');
@@ -223,15 +226,44 @@ async function takeScreenshot(page: Page, fullPage = false): Promise<Buffer | nu
 }
 
 /**
+ * Fail fast with a clear message when the edge returns 403/challenge HTML
+ * instead of the real page (common on .nic.in / Cloudflare hosts).
+ */
+async function assertPageNotBlocked(page: Page, url: string, status: number | null): Promise<void> {
+  if (isBlockedHttpStatus(status)) {
+    logger.warn({ url, status }, 'Site returned a blocked HTTP status to the scanner');
+    throw new SiteBlockedError(undefined, status ?? undefined);
+  }
+
+  let bodySample = '';
+  try {
+    bodySample = await page.evaluate(() => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const doc = (globalThis as any).document as Document;
+      return (doc.body?.innerText ?? doc.documentElement?.textContent ?? '').slice(0, 4000);
+    });
+  } catch {
+    bodySample = '';
+  }
+
+  const htmlSample = await page.content().catch(() => '');
+  if (looksLikeBlockedPage(bodySample) || looksLikeBlockedPage(htmlSample)) {
+    logger.warn({ url, status }, 'Site body looks like a bot-protection challenge');
+    throw new SiteBlockedError(undefined, status ?? undefined);
+  }
+}
+
+/**
  * Scan a single page for accessibility data.
  *
  * Workflow:
  * 1. Create isolated browser context
  * 2. Navigate to URL with retry on timeout
- * 3. Handle authentication if configured
- * 4. Extract page metadata (title, lang, headings, landmarks)
- * 5. Take desktop and mobile screenshots
- * 6. Return PageScanResult (violations populated by axe-runner separately)
+ * 3. Detect bot-wall / 403 responses with a clear user-facing error
+ * 4. Handle authentication if configured
+ * 5. Extract page metadata (title, lang, headings, landmarks)
+ * 6. Take desktop and mobile screenshots
+ * 7. Return PageScanResult (violations populated by axe-runner separately)
  *
  * @param browser - Playwright browser instance
  * @param url - URL to scan
@@ -252,14 +284,17 @@ export async function scanPage(
   const startTime = Date.now();
 
   const context = await browser.newContext({
-    userAgent:
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 AccessShield-Scanner/1.0',
+    userAgent: SCANNER_USER_AGENT,
     viewport: DESKTOP_VIEWPORT,
+    locale: 'en-IN',
+    timezoneId: 'Asia/Kolkata',
+    extraHTTPHeaders: SCANNER_HTTP_HEADERS,
     ignoreHTTPSErrors: true,
     javaScriptEnabled: true,
     // A11Y: scanners must inject axe-core; strict CSP blocks script tags without this.
     bypassCSP: true,
   });
+  await applyScannerStealth(context);
 
   const page = await context.newPage();
 
@@ -268,8 +303,9 @@ export async function scanPage(
       await injectAuth(page, config.loginConfig);
     }
 
+    let response: import('playwright').Response | null = null;
     try {
-      await page.goto(url, {
+      response = await page.goto(url, {
         waitUntil: 'load',
         timeout: NAVIGATION_TIMEOUT,
       });
@@ -279,7 +315,7 @@ export async function scanPage(
         'Initial navigation failed, retrying with domcontentloaded',
       );
 
-      await page.goto(url, {
+      response = await page.goto(url, {
         waitUntil: 'domcontentloaded',
         timeout: NAVIGATION_TIMEOUT,
       });
@@ -288,6 +324,8 @@ export async function scanPage(
     await page.waitForSelector('body', { timeout: 10000 }).catch(() => {});
 
     await page.waitForTimeout(PAGE_SETTLE_TIME);
+
+    await assertPageNotBlocked(page, url, response?.status() ?? null);
 
     const [title, langAttribute, headingStructure, landmarkRegions] = await Promise.all([
       page.title().catch(() => ''),
