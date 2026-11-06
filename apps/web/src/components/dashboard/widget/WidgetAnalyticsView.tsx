@@ -281,9 +281,9 @@ export function WidgetAnalyticsView() {
             >
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={trendData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                  <XAxis dataKey="date" stroke="#6B7280" style={{ fontSize: '12px' }} />
-                  <YAxis allowDecimals={false} stroke="#6B7280" style={{ fontSize: '12px' }} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#3f3f46" />
+                  <XAxis dataKey="date" stroke="#a1a1aa" style={{ fontSize: '12px' }} />
+                  <YAxis allowDecimals={false} stroke="#a1a1aa" style={{ fontSize: '12px' }} />
                   <Tooltip />
                   <Line
                     type="monotone"
@@ -321,13 +321,13 @@ export function WidgetAnalyticsView() {
                     layout="vertical"
                     margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
                   >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                    <XAxis type="number" allowDecimals={false} stroke="#6B7280" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#3f3f46" />
+                    <XAxis type="number" allowDecimals={false} stroke="#a1a1aa" />
                     <YAxis
                       type="category"
                       dataKey="name"
                       width={120}
-                      stroke="#6B7280"
+                      stroke="#a1a1aa"
                       style={{ fontSize: '12px' }}
                     />
                     <Tooltip />
@@ -364,13 +364,13 @@ export function WidgetAnalyticsView() {
                     layout="vertical"
                     margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
                   >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                    <XAxis type="number" allowDecimals={false} stroke="#6B7280" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#3f3f46" />
+                    <XAxis type="number" allowDecimals={false} stroke="#a1a1aa" />
                     <YAxis
                       type="category"
                       dataKey="name"
                       width={140}
-                      stroke="#6B7280"
+                      stroke="#a1a1aa"
                       style={{ fontSize: '12px' }}
                     />
                     <Tooltip />

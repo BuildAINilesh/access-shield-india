@@ -38,8 +38,30 @@ export interface OneTimeSku {
   cta: { text: string; href: string };
 }
 
+export type OfferBilling = 'one_time' | 'monthly';
+export type DisplayCurrency = 'INR' | 'USD';
+
+/** Indicative mid-market rate for the currency toggle — not a live FX feed. */
+export const INR_PER_USD = 83;
+
+export interface PublicOffer {
+  id: string;
+  name: string;
+  subtitle: string;
+  priceInr: number;
+  billing: OfferBilling;
+  includedScans?: number;
+  overageInr?: number;
+  badge?: string;
+  popular?: boolean;
+  highlighted?: boolean;
+  priceNote: string;
+  features: readonly string[];
+  cta: { text: string; href: string };
+}
+
 export const AUTOMATION_DISCLAIMER =
-  'Automated scanning alone cannot establish full WCAG, RPwD, IS 17802, GIGW, or SEBI conformance. Paid offers include or recommend appropriate manual testing and expert review.';
+  'Automated scanning alone cannot establish full WCAG conformance. Certified Assurance includes manual testing by a qualified accessibility auditor.';
 
 export const PRICING_STRATEGY_DISCLAIMER =
   'Prices shown are AccessibleNow’s illustrative product strategy for the Indian market — not Deque Systems pricing or established market benchmarks.';
@@ -132,10 +154,100 @@ export const PRICING_CATALOG = {
   } satisfies MonthlyPlan,
 
   widgetDisclaimer:
-    'The accessibility widget is a user-experience enhancement — not a compliance mechanism. It does not, on its own, make a site RPwD-, SEBI-, or GIGW-compliant. True compliance requires assessment, code-level remediation, and documented evidence.',
+    'The accessibility widget is a user-experience enhancement — not a compliance mechanism. It does not, on its own, make a site WCAG-conformant. Conformance requires assessment, code-level remediation, and documented evidence.',
 
   automationDisclaimer: AUTOMATION_DISCLAIMER,
   strategyDisclaimer: PRICING_STRATEGY_DISCLAIMER,
+
+  websiteOffers: [
+    {
+      id: 'access-widget',
+      name: 'Access Widget',
+      subtitle: 'Assistive overlay · any website',
+      priceInr: 4999,
+      billing: 'one_time',
+      priceNote: 'one-time licence',
+      features: [
+        'Install on any website — no audit required',
+        'Font size, contrast, and reading tools',
+        'Keyboard-navigation aids',
+        'Widget updates included',
+        'Does not, on its own, establish WCAG conformance',
+      ],
+      cta: { text: 'Get Access Widget', href: '/contact?service=access-widget' },
+    },
+    {
+      id: 'automated-site-scan',
+      name: 'Automated Site Scan',
+      subtitle: 'Findings only · no remediations',
+      priceInr: 9999,
+      billing: 'one_time',
+      priceNote: 'one-time engagement',
+      features: [
+        'Full automated website scan',
+        'Severity-ranked findings report (PDF)',
+        'WCAG 2.2 AA rule coverage',
+        'Page URL, selector, and issue summary',
+        'No code changes or remediations included',
+      ],
+      cta: { text: 'Book a site scan', href: '/contact?service=automated-site-scan' },
+    },
+    {
+      id: 'scan-remediation',
+      name: 'Scan & Remediation',
+      subtitle: 'Automated scan plus guided fixes',
+      priceInr: 19999,
+      billing: 'one_time',
+      popular: true,
+      badge: 'Most chosen',
+      highlighted: true,
+      priceNote: 'one-time engagement',
+      features: [
+        'Everything in Automated Site Scan',
+        'AI-assisted remediations for safe, file-level fixes',
+        'Prioritized fix list with owners',
+        'Re-scan after the first fix pass',
+        'Guidance for issues that need engineering',
+      ],
+      cta: { text: 'Start Scan & Remediation', href: '/contact?service=scan-remediation' },
+    },
+    {
+      id: 'certified-assurance',
+      name: 'Certified Assurance',
+      subtitle: 'End-to-end programme · auditor-led',
+      priceInr: 24999,
+      billing: 'monthly',
+      includedScans: 5,
+      priceNote: 'per month · 5 website scans',
+      features: [
+        'Access Widget + Automated Site Scan + Scan & Remediation',
+        'Manual testing by a certified accessibility auditor',
+        '5 website scans included each month',
+        'Keyboard and screen-reader evidence',
+        'Monthly report your compliance team can file',
+      ],
+      cta: { text: 'Start Certified Assurance', href: '/contact?service=certified-assurance' },
+    },
+  ] satisfies PublicOffer[],
+
+  documentOffer: {
+    id: 'document-scan',
+    name: 'Document Scan Programme',
+    subtitle: 'PDF, Word, and presentations',
+    priceInr: 0,
+    billing: 'one_time',
+    includedScans: 50,
+    overageInr: 500,
+    priceNote: '50 scans included, then billed per scan',
+    features: [
+      'Scan PDF, Word, and slide decks for accessibility barriers',
+      'Up to 50 document scans included at no charge',
+      'Published per-scan rate after the 50-scan allowance',
+      'Reading-order, tags, and alternative-text findings',
+      'Per-document report you can hand to authors',
+    ],
+    cta: { text: 'Start document scanning', href: '/document-scanner' },
+  } satisfies PublicOffer,
 
   /** Expert services — project-based (published “from” floors) */
   expertServices: [
@@ -271,6 +383,11 @@ export const REMEDIATION_SKUS = PRICING_CATALOG.expertServices.filter(
   (s) => s.id === 'remediation-small' || s.id === 'remediation-large',
 );
 
+export const WEBSITE_OFFERS = PRICING_CATALOG.websiteOffers;
+export const DOCUMENT_OFFER = PRICING_CATALOG.documentOffer;
+/** @deprecated Use WEBSITE_OFFERS */
+export const AUDIT_PACKAGES = PRICING_CATALOG.websiteOffers;
+
 export const STANDALONE_AUDIT = PRICING_CATALOG.expertServices.find((s) => s.id === 'audit-web')!;
 
 export const EXPERT_ADDONS = PRICING_CATALOG.expertServices.filter(
@@ -314,6 +431,27 @@ function formatInrStatic(amount: number): string {
 
 export function formatInr(amount: number): string {
   return formatInrStatic(amount);
+}
+
+export function formatMoney(amountInr: number, currency: DisplayCurrency): string {
+  if (currency === 'USD') {
+    const usd = amountInr / INR_PER_USD;
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      maximumFractionDigits: 0,
+    }).format(usd);
+  }
+  return formatInr(amountInr);
+}
+
+export function formatOfferPrice(offer: PublicOffer, currency: DisplayCurrency): string {
+  if (offer.id === 'document-scan') {
+    const overage = formatMoney(offer.overageInr ?? 500, currency);
+    return `${offer.includedScans ?? 50} free · then ${overage}`;
+  }
+  const amount = formatMoney(offer.priceInr, currency);
+  return offer.billing === 'monthly' ? `${amount}/mo` : amount;
 }
 
 export function formatPlanPrice(

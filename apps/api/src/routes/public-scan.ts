@@ -88,29 +88,12 @@ export function createPublicScanRouter(db: Database, redis: Redis): ExpressRoute
         return;
       }
 
+      // Don't stall the user on a HEAD probe — CDNs and WAFs often block it (5s timeout
+      // then a false "couldn't reach this website"). The worker reports a real failure.
       try {
-        const urlCheck = new URL(url);
-        const headResponse = await fetch(urlCheck.toString(), {
-          method: 'HEAD',
-          signal: AbortSignal.timeout(5000),
-        });
-        if (!headResponse.ok && headResponse.status !== 405) {
-          sendProblem(
-            res,
-            422,
-            'unreachable-url',
-            "We couldn't reach this website. Please check the URL and try again.",
-          );
-          return;
-        }
-      } catch (err) {
-        logger.warn({ err, url }, 'URL reachability check failed');
-        sendProblem(
-          res,
-          422,
-          'unreachable-url',
-          "We couldn't reach this website. Please check the URL and try again.",
-        );
+        new URL(url);
+      } catch {
+        sendProblem(res, 400, 'validation-error', 'Invalid URL format');
         return;
       }
 

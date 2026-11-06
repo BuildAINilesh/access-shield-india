@@ -103,21 +103,21 @@ export function Sidebar({ userRole }: SidebarProps) {
   return (
     <aside
       className={cn(
-        'flex flex-col border-r border-gray-200/90 bg-white transition-all duration-200',
+        'flex flex-col border-r border-zinc-800 bg-[#12121a] transition-all duration-200',
         sidebarCollapsed ? 'w-[4.5rem]' : 'w-60',
       )}
       aria-label={nav.sidebarAria}
     >
-      <div className="flex h-[4.5rem] items-center justify-between gap-2 border-b border-primary-100 px-3">
+      <div className="flex h-[4.5rem] items-center justify-between gap-2 border-b border-zinc-800 px-3">
         <Link
           href={homeHref}
           className="min-w-0 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
           aria-label="AccessibleNow"
         >
           {sidebarCollapsed ? (
-            <BrandLogo variant="mark" height={40} decorative />
+            <BrandLogo variant="mark" height={40} decorative onDark />
           ) : (
-            <BrandLogo variant="full" height={48} decorative />
+            <BrandLogo variant="full" height={48} decorative onDark />
           )}
         </Link>
         <button

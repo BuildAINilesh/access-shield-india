@@ -1,22 +1,9 @@
 import type { Metadata } from 'next';
-import {
-  FileCheck,
-  UserCheck,
-  GraduationCap,
-  FileText,
-  TestTube,
-  Languages,
-} from 'lucide-react';
-import { LocaleLink } from '@/components/common/LocaleLink';
 import { ButtonLink } from '@/components/marketing/ButtonLink';
-import { ComplianceStrip } from '@/components/marketing/ComplianceStrip';
+import { PricingOfferings } from '@/components/marketing/pricing/PricingOfferings';
 import { getDictionary } from '@/lib/i18n/get-dictionary';
 import type { Locale } from '@/lib/i18n/config';
-import {
-  AUTOMATION_DISCLAIMER,
-  PRICING_CATALOG,
-  formatInr,
-} from '@/lib/pricing/catalog';
+import { AUTOMATION_DISCLAIMER } from '@/lib/pricing/catalog';
 
 export async function generateMetadata({
   params,
@@ -40,15 +27,6 @@ export async function generateMetadata({
   };
 }
 
-const SERVICE_ICONS = {
-  auditing: FileCheck,
-  consulting: UserCheck,
-  training: GraduationCap,
-  reports: FileText,
-  testing: TestTube,
-  multilingual: Languages,
-} as const;
-
 export default async function ServicesHubPage({
   params,
 }: {
@@ -60,183 +38,121 @@ export default async function ServicesHubPage({
 
   return (
     <>
-      {/* JSON-LD Service schema */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'Service',
-            name: 'AccessShield India Accessibility Services',
+            name: 'Accessibility Audit and Reporting',
             description: servicesHub.meta.description,
             provider: {
               '@type': 'Organization',
               name: dict.common.brand,
               url: 'https://accessshield.in',
             },
-            areaServed: {
-              '@type': 'Country',
-              name: 'India',
-            },
-            serviceType: 'Digital Accessibility Compliance',
+            areaServed: { '@type': 'Country', name: 'India' },
+            serviceType: 'Digital Accessibility Audit',
           }),
         }}
       />
 
-      {/* Hero */}
-      <header className="border-b border-gray-200 bg-gradient-to-b from-primary-50 via-white to-white px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
-        <div className="mx-auto max-w-4xl text-center">
-          <h1 className="text-4xl font-bold tracking-tight text-text-primary sm:text-5xl lg:text-[3.25rem] lg:leading-tight">
+      <header className="border-b border-white/10 bg-[#07070c] px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
+        <div className="mx-auto max-w-3xl text-center">
+          <h1 className="text-4xl font-semibold tracking-tight text-white sm:text-5xl">
             {servicesHub.hero.title}
           </h1>
-          <p className="mx-auto mt-6 max-w-3xl text-lg leading-relaxed text-text-secondary sm:text-xl">
+          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-zinc-300">
             {servicesHub.hero.subtitle}
           </p>
+          <p className="mx-auto mt-4 max-w-2xl text-sm text-zinc-400" role="note">
+            {AUTOMATION_DISCLAIMER}
+          </p>
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <ButtonLink
-              href="/scan"
-              size="lg"
-              variant="primary"
-              className="min-w-[240px]"
-            >
+            <ButtonLink href="#packages-heading" size="lg" variant="primary" className="min-w-[240px]">
               {servicesHub.hero.primaryCta}
             </ButtonLink>
-            <ButtonLink
-              href="/contact?type=consultation"
-              size="lg"
-              variant="secondary"
-              className="min-w-[240px]"
-            >
+            <ButtonLink href="/scan" size="lg" variant="secondary" className="min-w-[240px]">
               {servicesHub.hero.secondaryCta}
             </ButtonLink>
           </div>
         </div>
       </header>
 
-      {/* Services Grid */}
       <section
-        aria-labelledby="services-grid-heading"
-        className="border-b border-gray-200 bg-white px-4 py-16 sm:px-6 lg:px-8"
+        aria-labelledby="service-heading"
+        className="border-b border-white/10 bg-[#07070c] px-4 py-16 sm:px-6 lg:px-8"
       >
-        <div className="mx-auto max-w-7xl">
-          <h2 id="services-grid-heading" className="sr-only">
-            Our services
+        <div className="mx-auto max-w-5xl">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">
+            {servicesHub.service.tagline}
+          </p>
+          <h2 id="service-heading" className="mt-3 text-3xl font-semibold text-white">
+            {servicesHub.service.name}
           </h2>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {servicesHub.servicesGrid.map(({ id, name, description, href }) => {
-              const Icon = SERVICE_ICONS[id as keyof typeof SERVICE_ICONS];
-              return (
-                <LocaleLink
-                  key={id}
-                  href={href}
-                  className="group flex flex-col gap-4 rounded-xl border border-border bg-bg-secondary p-6 transition-all hover:border-primary-600 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
-                >
-                  <article>
-                    <div
-                      className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary-100 text-primary-600 transition-colors group-hover:bg-primary-600 group-hover:text-white"
-                      aria-hidden="true"
-                    >
-                      <Icon className="h-6 w-6" />
-                    </div>
-                    <h3 className="mt-4 text-xl font-semibold text-text-primary">
-                      {name}
-                    </h3>
-                    <p className="mt-2 text-base leading-normal text-text-secondary">
-                      {description}
-                    </p>
-                    <span className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-primary-600 group-hover:underline">
-                      {dict.common.actions.learnMore}
-                      <span aria-hidden="true">→</span>
-                    </span>
-                  </article>
-                </LocaleLink>
-              );
-            })}
-          </div>
-        </div>
-      </section>
+          <p className="mt-4 max-w-3xl text-base leading-relaxed text-zinc-400">
+            {servicesHub.service.body}
+          </p>
 
-      {/* Expert services SKUs — second revenue engine */}
-      <section
-        aria-labelledby="expert-skus-heading"
-        className="border-b border-gray-200 bg-white px-4 py-16 sm:px-6 lg:px-8"
-      >
-        <div className="mx-auto max-w-7xl">
-          <h2
-            id="expert-skus-heading"
-            className="text-center text-3xl font-bold text-text-primary"
-          >
-            Expert services — from prices
-          </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-center text-base text-text-secondary">
-            Project-based compliance work after your free scan. Software alone is not a conformance
-            certificate.
-          </p>
-          <p className="mx-auto mt-2 max-w-2xl text-center text-sm text-text-tertiary" role="note">
-            {AUTOMATION_DISCLAIMER}
-          </p>
-          <ul className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {PRICING_CATALOG.expertServices.map((sku) => (
+          <h3 className="mt-12 text-xl font-semibold text-white">
+            {servicesHub.service.deliverablesTitle}
+          </h3>
+          <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+            {servicesHub.service.deliverables.map((item) => (
               <li
-                key={sku.id}
-                className="flex flex-col rounded-xl border border-border bg-bg-secondary p-6"
+                key={item}
+                className="rounded-lg border border-white/10 bg-[#12121a] px-4 py-3 text-sm leading-normal text-zinc-300"
               >
-                <h3 className="text-lg font-semibold text-text-primary">{sku.name}</h3>
-                <p className="mt-1 text-sm text-text-secondary">{sku.subtitle}</p>
-                <p className="mt-3 text-2xl font-bold text-primary-700">
-                  From {formatInr(sku.priceInr)}
-                </p>
-                <ul className="mt-4 flex-1 space-y-2">
-                  {sku.features.slice(0, 3).map((f) => (
-                    <li key={f} className="text-sm text-text-secondary">
-                      · {f}
-                    </li>
-                  ))}
-                </ul>
-                <ButtonLink
-                  href={sku.cta.href}
-                  variant="secondary"
-                  size="sm"
-                  className="mt-6 w-full"
-                >
-                  {sku.cta.text}
-                </ButtonLink>
+                {item}
               </li>
             ))}
           </ul>
+
+          <h3 className="mt-12 text-xl font-semibold text-white">
+            {servicesHub.service.processTitle}
+          </h3>
+          <ol className="mt-6 grid gap-6 sm:grid-cols-3">
+            {servicesHub.service.process.map((step) => (
+              <li key={step.step} className="rounded-xl border border-white/10 bg-[#12121a] p-6">
+                <p className="text-xs font-semibold tracking-[0.16em] text-zinc-500">{step.step}</p>
+                <h4 className="mt-3 text-lg font-semibold text-white">{step.title}</h4>
+                <p className="mt-2 text-sm leading-normal text-zinc-400">{step.description}</p>
+              </li>
+            ))}
+          </ol>
         </div>
       </section>
 
-      {/* Why India-specific matters */}
       <section
-        aria-labelledby="why-india-heading"
-        className="border-b border-gray-200 bg-bg-secondary px-4 py-16 sm:px-6 lg:px-8"
+        aria-labelledby="packages-heading"
+        className="border-b border-white/10 bg-[#0a0a10] px-4 py-16 sm:px-6 lg:px-8"
       >
         <div className="mx-auto max-w-7xl">
-          <h2
-            id="why-india-heading"
-            className="text-center text-3xl font-bold text-text-primary"
-          >
+          <PricingOfferings />
+        </div>
+      </section>
+
+      <section
+        aria-labelledby="why-india-heading"
+        className="bg-[#07070c] px-4 py-16 sm:px-6 lg:px-8"
+      >
+        <div className="mx-auto max-w-7xl">
+          <h2 id="why-india-heading" className="text-center text-3xl font-semibold text-white">
             {servicesHub.whyIndia.title}
           </h2>
           <div className="mt-12 grid gap-8 sm:grid-cols-3">
             {servicesHub.whyIndia.stats.map(({ value, label }) => (
-              <LocaleLink
+              <div
                 key={value}
-                href="/rpwd-act"
-                className="flex flex-col items-center rounded-xl border border-border bg-white p-8 text-center transition-all hover:border-primary-600 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
+                className="flex flex-col items-center rounded-xl border border-white/10 bg-[#12121a] p-8 text-center"
               >
-                <p className="text-4xl font-bold text-primary-600">{value}</p>
-                <p className="mt-3 text-base leading-normal text-text-secondary">
-                  {label}
-                </p>
-              </LocaleLink>
+                <p className="text-3xl font-semibold text-white">{value}</p>
+                <p className="mt-3 text-base leading-normal text-zinc-400">{label}</p>
+              </div>
             ))}
           </div>
         </div>
       </section>
-
-      <ComplianceStrip />
     </>
   );
 }

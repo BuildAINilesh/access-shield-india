@@ -2,18 +2,13 @@ import { Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import type { Metadata } from 'next';
 import { HeroSection } from '@/components/marketing/home/HeroSection';
-import { LiveTicker } from '@/components/marketing/home/LiveTicker';
 import { RiskStatsBar } from '@/components/marketing/home/RiskStatsBar';
+import { HowItWorksSection } from '@/components/marketing/home/HowItWorksSection';
 import { FeaturesSection } from '@/components/marketing/home/FeaturesSection';
 import { WhoWeBuildForSection } from '@/components/marketing/home/WhoWeBuildForSection';
-import { HowItWorksSection } from '@/components/marketing/home/HowItWorksSection';
 import { StandardsSection } from '@/components/marketing/home/StandardsSection';
 import { TestimonialsSection } from '@/components/marketing/home/TestimonialsSection';
 import { BlogPreviewSection } from '@/components/marketing/home/BlogPreviewSection';
-import { ComplianceQuiz } from '@/components/marketing/home/ComplianceQuiz';
-import { DisabilitySimulator } from '@/components/marketing/home/DisabilitySimulator';
-import { RiskCalculator } from '@/components/marketing/home/RiskCalculator';
-import { StoryCarousel } from '@/components/marketing/home/StoryCarousel';
 import { MarketingSectionSkeleton } from '@/components/marketing/MarketingSectionSkeleton';
 import { getDictionary } from '@/lib/i18n/get-dictionary';
 import { localeFromParams } from '@/lib/i18n/server';
@@ -22,6 +17,44 @@ import type { Locale } from '@/lib/i18n/config';
 
 /** ISR — refresh marketing home hourly (blog preview may lag up to 60s via Sanity revalidate). */
 export const revalidate = 3600;
+
+const StoryCarousel = dynamic(
+  () =>
+    import('@/components/marketing/home/StoryCarousel').then((mod) => ({
+      default: mod.StoryCarousel,
+    })),
+  { loading: () => <MarketingSectionSkeleton className="min-h-[220px]" /> },
+);
+
+const DisabilitySimulator = dynamic(
+  () =>
+    import('@/components/marketing/home/DisabilitySimulator').then((mod) => ({
+      default: mod.DisabilitySimulator,
+    })),
+  { loading: () => <MarketingSectionSkeleton className="min-h-[280px]" /> },
+);
+
+const RiskCalculator = dynamic(
+  () =>
+    import('@/components/marketing/home/RiskCalculator').then((mod) => ({
+      default: mod.RiskCalculator,
+    })),
+  { loading: () => <MarketingSectionSkeleton className="min-h-[280px]" /> },
+);
+
+const ComplianceQuiz = dynamic(
+  () =>
+    import('@/components/marketing/home/ComplianceQuiz').then((mod) => ({
+      default: mod.ComplianceQuiz,
+    })),
+  { loading: () => <MarketingSectionSkeleton className="min-h-[280px]" /> },
+);
+
+const LiveTicker = dynamic(() =>
+  import('@/components/marketing/home/LiveTicker').then((mod) => ({
+    default: mod.LiveTicker,
+  })),
+);
 
 const CTABanner = dynamic(
   () =>
@@ -63,9 +96,9 @@ export default function HomePage({ params }: { params: { locale: string } }) {
 
   return (
     <>
-      <StoryCarousel />
       <HeroSection />
       <RiskStatsBar locale={locale} />
+      <StoryCarousel />
       <DisabilitySimulator />
       <RiskCalculator />
       <HowItWorksSection locale={locale} />

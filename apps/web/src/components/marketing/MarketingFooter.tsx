@@ -5,7 +5,7 @@ import { BrandLogo } from '@/components/brand/BrandLogo';
 import { useDictionary } from '@/lib/i18n/locale-context';
 
 const footerLinkClass =
-  'text-base text-text-secondary hover:text-primary-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2 rounded-sm';
+  'text-base text-zinc-400 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07070c] rounded-sm';
 
 export function MarketingFooter() {
   const { common } = useDictionary();
@@ -13,20 +13,20 @@ export function MarketingFooter() {
   const { footer: f, brand } = common;
 
   return (
-    <footer className="border-t border-primary-100 bg-primary-50/40">
+    <footer className="border-t border-white/10 bg-[#050508]">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="mb-10">
           <LocaleLink
             href="/"
-            className="inline-block rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
+            className="inline-block rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#050508]"
             aria-label={brand}
           >
-            <BrandLogo variant="full" height={64} decorative />
+            <BrandLogo variant="full" height={64} decorative onDark />
           </LocaleLink>
         </div>
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-700">
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-200">
               {f.compliance}
             </h2>
             <ul className="mt-4 space-y-3">
@@ -59,7 +59,7 @@ export function MarketingFooter() {
           </div>
 
           <div>
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-700">
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-200">
               {f.product}
             </h2>
             <ul className="mt-4 space-y-3">
@@ -97,7 +97,7 @@ export function MarketingFooter() {
           </div>
 
           <div>
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-700">
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-200">
               {f.company}
             </h2>
             <ul className="mt-4 space-y-3">
@@ -131,7 +131,7 @@ export function MarketingFooter() {
           </div>
 
           <div>
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-700">
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-200">
               {f.legal}
             </h2>
             <ul className="mt-4 space-y-3">
@@ -159,8 +159,8 @@ export function MarketingFooter() {
           </div>
         </div>
 
-        <div className="mt-12 border-t border-primary-100 pt-8">
-          <p className="text-sm text-text-secondary">
+        <div className="mt-12 border-t border-white/10 pt-8">
+          <p className="text-sm text-zinc-400">
             &copy; {currentYear} {brand}. {f.copyright}
             <span className="ml-4">{f.gstin}</span>
             <span className="ml-4">{f.location}</span>

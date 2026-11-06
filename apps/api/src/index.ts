@@ -28,6 +28,7 @@ import { createUsersRouter } from './routes/users';
 import { createWidgetRouter, createPublicWidgetRouter } from './routes/widget';
 import { createScannerRouter, closeRabbitMQ } from './scanner/orchestrator';
 import { createPublicScanRouter } from './routes/public-scan';
+import { createPublicChatRouter } from './routes/public-chat';
 import { createPublicWaitlistRouter } from './routes/public-waitlist';
 import { createPublicSignupRouter } from './routes/public-signup';
 import { createPublicFunnelRouter } from './routes/public-funnel';
@@ -115,6 +116,9 @@ async function bootstrap() {
 
   const publicScanRouter = createPublicScanRouter(db, redis);
   app.use('/api/v1/public/scan', publicScanRouter);
+
+  const publicChatRouter = createPublicChatRouter(redis);
+  app.use('/api/v1/public/chat', publicChatRouter);
 
   const publicWaitlistRouter = createPublicWaitlistRouter(db, redis);
   app.use('/api/v1/public/waitlist', publicWaitlistRouter);

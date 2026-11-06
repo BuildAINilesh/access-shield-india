@@ -116,7 +116,7 @@ export default function OnboardingPage() {
 ></script>`;
 
   return (
-    <main className="min-h-screen bg-bg-secondary px-4 py-12">
+    <main className="min-h-screen bg-[#07070c] px-4 py-12">
       <div className="mx-auto max-w-3xl">
         {/* Progress Indicator */}
         <nav aria-label="Onboarding steps" className="mb-8">

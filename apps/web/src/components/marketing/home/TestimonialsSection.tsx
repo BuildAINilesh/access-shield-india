@@ -19,7 +19,7 @@ export function TestimonialsSection({ locale }: { locale: Locale }) {
           {testimonials.items.map((testimonial) => (
             <div
               key={testimonial.name}
-              className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
+              className="rounded-lg border border-white/10 bg-[#12121a] p-6"
             >
               <div
                 className="flex items-center gap-1"

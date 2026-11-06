@@ -31,6 +31,10 @@ const nextConfig = {
   outputFileTracingRoot: monorepoRoot,
   reactStrictMode: true,
   poweredByHeader: false,
+  compress: true,
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error', 'warn'] } : false,
+  },
   // .env.local lives at monorepo root — expose to Next.js client, server, and edge middleware
   env: {
     NEXT_PUBLIC_AUTH_URL: process.env.NEXT_PUBLIC_AUTH_URL ?? '',
@@ -97,6 +101,22 @@ const nextConfig = {
       };
     }
     return config;
+  },
+  async headers() {
+    return [
+      {
+        source: '/widget.js',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=300, stale-while-revalidate=86400' },
+        ],
+      },
+      {
+        source: '/brand/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=86400, stale-while-revalidate=604800' },
+        ],
+      },
+    ];
   },
   async redirects() {
     return [

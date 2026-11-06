@@ -214,7 +214,7 @@ function buildAxeTags(config: ScanJobConfig): string[] {
   return [...new Set(tags)];
 }
 
-const SCROLL_SETTLE_MS = 2500;
+const SCROLL_SETTLE_MS = 600;
 
 /**
  * RULE-002: scroll to bottom so lazy-loaded images/carousels enter the DOM, then return to top.

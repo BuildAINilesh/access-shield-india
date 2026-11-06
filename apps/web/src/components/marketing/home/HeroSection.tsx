@@ -1,19 +1,13 @@
 'use client';
 
-import { Building2, FileCheck, Landmark, ShieldCheck } from 'lucide-react';
-import { Badge } from '@accessshield/ui';
-import { ButtonAnchor } from '@/components/marketing/ButtonLink';
+import { ButtonAnchor, ButtonLink } from '@/components/marketing/ButtonLink';
 import { HeroScanInput } from '@/components/marketing/home/HeroScanInput';
-import { MarketingImage } from '@/components/marketing/visuals/MarketingImage';
-import { MARKETING_IMAGES } from '@/lib/marketing/images';
 import { useDictionary } from '@/lib/i18n/locale-context';
-
-const SECTOR_ICONS = [Building2, Landmark, ShieldCheck, FileCheck];
 
 function CheckIcon() {
   return (
     <svg
-      className="h-5 w-5 shrink-0 text-success-700"
+      className="h-5 w-5 shrink-0 text-emerald-400"
       viewBox="0 0 20 20"
       fill="currentColor"
       aria-hidden="true"
@@ -31,128 +25,156 @@ export function HeroSection() {
   const { home, common } = useDictionary();
   const { hero } = home;
   const calendlyUrl = process.env.NEXT_PUBLIC_CALENDLY_URL;
+  const demoHref = calendlyUrl || '/contact?plan=enterprise';
 
   return (
-    <section className="relative overflow-hidden border-b border-primary-100 bg-gradient-to-b from-primary-100 via-primary-50 to-white px-4 py-20 sm:px-6 sm:py-24 lg:px-8 lg:py-28">
+    <section className="relative overflow-hidden border-b border-white/10 bg-[#07070c] px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24">
       <div
-        className="pointer-events-none absolute -left-24 top-10 h-72 w-72 rounded-full bg-primary-200/50 blur-3xl"
-        aria-hidden="true"
-      />
-      <div
-        className="pointer-events-none absolute -right-16 bottom-0 h-80 w-80 rounded-full bg-primary-300/40 blur-3xl"
+        className="pointer-events-none absolute left-1/2 top-0 h-56 w-[36rem] -translate-x-1/2 rounded-full bg-violet-500/[0.08] blur-3xl"
         aria-hidden="true"
       />
       <div className="relative mx-auto max-w-7xl">
-        <div className="grid items-center gap-14 lg:grid-cols-2 lg:gap-16">
+        <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-16">
           <div className="text-center lg:text-left">
-            <ul
-              className="flex flex-wrap items-center justify-center gap-2 lg:justify-start"
-              aria-label={hero.urgencyAria}
-            >
-              {hero.badges.map((badge, i) => (
-                <li key={badge}>
-                  <Badge
-                    variant={i === 0 ? 'accent' : 'outline'}
-                    size="lg"
-                    className={
-                      i === 0
-                        ? 'border-2 border-accent/40 shadow-sm'
-                        : 'border-2 border-primary-200 bg-white shadow-sm'
-                    }
-                  >
-                    {badge}
-                  </Badge>
-                </li>
-              ))}
-            </ul>
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-violet-300">
+              {hero.badges[0]}
+            </p>
 
-            <h1 className="mt-8 text-4xl font-bold leading-[1.08] tracking-tight text-text-primary sm:text-5xl lg:text-[3.5rem] xl:text-6xl">
-              {hero.titleLine1} <span className="text-primary-700">{hero.titleHighlight}</span>.{' '}
-              <span className="text-primary-900">{hero.titleLine2}</span>
+            <h1 className="mt-5 text-4xl font-bold leading-[1.1] tracking-tight text-white sm:text-5xl lg:text-[3.25rem]">
+              {hero.titleLine1}{' '}
+              <span className="text-violet-200">{hero.titleHighlight}</span>
+              {hero.titleLine2 ? <> {hero.titleLine2}</> : null}
             </h1>
 
-            <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-text-secondary sm:text-xl lg:mx-0">
+            <p className="mx-auto mt-5 max-w-xl text-lg leading-relaxed text-zinc-300 lg:mx-0">
               {hero.subtitle}
             </p>
 
-            <ul
-              className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:max-w-2xl"
-              aria-label={hero.sectorsAria}
-            >
-              {hero.sectors.map((label, index) => {
-                const Icon = SECTOR_ICONS[index] ?? Building2;
-                return (
-                  <li
-                    key={label}
-                    className="flex flex-col items-center gap-2 rounded-lg border border-gray-200 bg-white/80 px-3 py-3 text-center shadow-sm backdrop-blur-sm lg:items-start lg:text-left"
-                  >
-                    <Icon className="h-5 w-5 text-primary-600" aria-hidden="true" />
-                    <span className="text-xs font-semibold leading-snug text-text-primary sm:text-sm">
-                      {label}
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
-
-            <ul className="mx-auto mt-8 max-w-xl space-y-3 text-left lg:mx-0">
-              {hero.trustPoints.map((point) => (
-                <li key={point} className="flex items-start gap-3 text-base text-text-secondary">
-                  <CheckIcon />
-                  <span>{point}</span>
-                </li>
-              ))}
-            </ul>
-
             <HeroScanInput />
 
-            <div className="mt-6 flex flex-col items-center justify-center gap-4 sm:flex-row lg:justify-start">
-              <ButtonAnchor
-                href={calendlyUrl || '/contact?plan=enterprise'}
-                size="lg"
-                variant="secondary"
-                className="w-full min-w-[240px] sm:w-auto"
-                {...(calendlyUrl ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-              >
-                {common.actions.bookDemo}
-              </ButtonAnchor>
+            <div className="mt-4 flex flex-col items-center gap-3 sm:flex-row lg:justify-start">
+              {calendlyUrl ? (
+                <ButtonAnchor
+                  href={calendlyUrl}
+                  size="lg"
+                  variant="secondary"
+                  className="w-full min-w-[200px] sm:w-auto"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {common.actions.bookDemo}
+                </ButtonAnchor>
+              ) : (
+                <ButtonLink
+                  href={demoHref}
+                  size="lg"
+                  variant="secondary"
+                  className="w-full min-w-[200px] sm:w-auto"
+                >
+                  {common.actions.bookDemo}
+                </ButtonLink>
+              )}
             </div>
 
-            <p className="mt-4 text-sm text-text-tertiary">{hero.footnote}</p>
+            <p className="mt-4 text-sm leading-normal text-zinc-400">{hero.footnote}</p>
 
             <ul
-              className="mt-10 flex flex-wrap items-center justify-center gap-2 lg:justify-start"
+              className="mt-8 flex flex-wrap items-center justify-center gap-2 lg:justify-start"
               aria-label={hero.standardsAria}
             >
               {hero.standards.map((standard) => (
-                <li key={standard}>
-                  <Badge
-                    variant="outline"
-                    size="lg"
-                    className="border-2 border-gray-300 bg-white shadow-sm"
-                  >
-                    {standard}
-                  </Badge>
+                <li
+                  key={standard}
+                  className="rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-semibold text-zinc-200"
+                >
+                  {standard}
                 </li>
               ))}
             </ul>
           </div>
 
-          <figure className="relative mx-auto w-full max-w-xl lg:mx-0">
-            <div className="relative aspect-[5/4] w-full overflow-hidden rounded-2xl border-2 border-primary-200 shadow-2xl">
-              <MarketingImage
-                src={MARKETING_IMAGES.hero}
-                alt={hero.visual.imageAlt}
-                fill
-                priority
-                sizes="(max-width: 1024px) 100vw, 540px"
-                className="object-cover object-center"
-              />
-            </div>
+          <figure className="relative mx-auto w-full max-w-lg lg:mx-0">
+            <HeroReportPreview />
             <figcaption className="sr-only">{hero.visual.figcaption}</figcaption>
           </figure>
         </div>
       </div>
     </section>
+  );
+}
+
+function HeroReportPreview() {
+  const { home, common } = useDictionary();
+  const { hero } = home;
+  const card = hero.reportCard;
+  const issues = [
+    { count: 4, label: common.severity.critical, text: 'text-red-300', bg: 'bg-red-950/80' },
+    { count: 9, label: common.severity.serious, text: 'text-amber-300', bg: 'bg-amber-950/70' },
+    { count: 8, label: common.severity.moderate, text: 'text-violet-300', bg: 'bg-violet-950/70' },
+    { count: 4, label: common.severity.minor, text: 'text-zinc-300', bg: 'bg-zinc-800' },
+  ];
+
+  return (
+    <div className="rounded-2xl border border-white/10 bg-[#12121a] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.45)]">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-sm font-medium text-zinc-400">{card.auditFile}</p>
+        <p className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-400">
+          <CheckIcon />
+          {hero.visual.scanComplete}
+          <span className="font-medium text-zinc-400">· {hero.visual.scanTime}</span>
+        </p>
+      </div>
+
+      <p className="mt-3 text-xl font-semibold text-white">{card.title}</p>
+
+      <div className="mt-6 flex flex-col gap-6 sm:flex-row sm:items-center">
+        <div className="flex items-center gap-4">
+          <div
+            className="relative grid h-24 w-24 shrink-0 place-items-center rounded-full"
+            style={{
+              background:
+                'conic-gradient(#34d399 0 259deg, #3f3f46 259deg 360deg)',
+            }}
+            role="img"
+            aria-label={`${card.scoreLabel}: 72`}
+          >
+            <span className="absolute inset-[0.4rem] grid place-items-center rounded-full bg-[#12121a] text-2xl font-bold text-white">
+              72
+            </span>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-zinc-400">{card.scoreLabel}</p>
+            <p className="mt-1 text-base font-semibold text-white">{card.scoreMeta}</p>
+          </div>
+        </div>
+      </div>
+
+      <ul className="mt-6 grid grid-cols-2 gap-2" aria-label={card.scoreMeta}>
+        {issues.map((issue) => (
+          <li
+            key={issue.label}
+            className={`flex min-h-11 items-center justify-between rounded-md px-3 py-2 ${issue.bg}`}
+          >
+            <span className={`text-sm font-medium ${issue.text}`}>{issue.label}</span>
+            <span className={`text-sm font-bold ${issue.text}`}>{issue.count}</span>
+          </li>
+        ))}
+      </ul>
+
+      <div className="mt-6 border-t border-white/10 pt-4">
+        <p className="text-sm font-semibold text-zinc-300">{card.exportsTitle}</p>
+        <ul className="mt-3 space-y-2">
+          {card.exports.map((item) => (
+            <li key={item.label} className="flex items-center justify-between gap-3 text-sm">
+              <span className="text-zinc-200">{item.label}</span>
+              <span className="inline-flex items-center gap-1 font-semibold text-emerald-400">
+                {item.status === 'Ready' || item.status.includes('Ready') ? <CheckIcon /> : null}
+                {item.status}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
   );
 }

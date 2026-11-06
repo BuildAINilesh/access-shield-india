@@ -20,7 +20,7 @@ export default function SignupPage() {
               className="rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
               aria-label="AccessibleNow — Home"
             >
-              <BrandLogo variant="full" height={72} priority decorative />
+              <BrandLogo variant="full" height={72} priority decorative onDark />
             </LocaleLink>
           </div>
           <h1 className="text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">

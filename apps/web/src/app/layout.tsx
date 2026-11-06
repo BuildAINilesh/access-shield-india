@@ -5,11 +5,14 @@ import { UiProviders } from '@/providers/UiProviders';
 import { getLocale } from '@/lib/i18n/server';
 import './globals.css';
 import '@/styles/button-theme.css';
+import '@/styles/marketing-dark.css';
 
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
   display: 'swap',
+  preload: true,
+  adjustFontFallback: true,
 });
 
 export const metadata: Metadata = {
@@ -56,14 +59,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   };
 
   return (
-    <html lang={htmlLang} className={inter.variable}>
+    <html lang={htmlLang} className={`${inter.variable} app-dark`}>
       <head>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
         />
       </head>
-      <body className="min-h-screen bg-white font-sans text-gray-900 antialiased">
+      <body className="app-dark min-h-screen bg-[#07070c] font-sans text-[#f4f4f5] antialiased">
         <ChunkLoadRecovery />
         <UiProviders>{children}</UiProviders>
       </body>

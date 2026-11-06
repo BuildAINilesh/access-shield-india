@@ -38,7 +38,7 @@ export function ScoreRingCard({ score, previousScore }: ScoreRingCardProps) {
       <div className="mt-6 flex items-center justify-center">
         <svg width="200" height="200" className="relative">
           {/* Background circle */}
-          <circle cx="100" cy="100" r={radius} fill="none" stroke="#E5E7EB" strokeWidth="16" />
+          <circle cx="100" cy="100" r={radius} fill="none" stroke="#3f3f46" strokeWidth="16" />
           {/* Score circle */}
           <circle
             cx="100"
@@ -56,10 +56,10 @@ export function ScoreRingCard({ score, previousScore }: ScoreRingCardProps) {
               transformOrigin: '50% 50%',
             }}
           />
-          <text x="100" y="95" textAnchor="middle" fontSize="48" fontWeight="bold" fill="#1A1A2E">
+          <text x="100" y="95" textAnchor="middle" fontSize="48" fontWeight="bold" fill="#f4f4f5">
             {score}
           </text>
-          <text x="100" y="115" textAnchor="middle" fontSize="16" fill="#6B7280">
+          <text x="100" y="115" textAnchor="middle" fontSize="16" fill="#a1a1aa">
             / 100
           </text>
         </svg>

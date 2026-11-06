@@ -101,6 +101,9 @@ export class Widget {
     btn.className = `as-launcher ${POS_CLASS[this.options.position]}`;
     btn.type = 'button';
     btn.setAttribute('aria-label', t('launcherLabel', this.lang));
+    btn.setAttribute('title', t('launcherLabel', this.lang));
+    btn.setAttribute('aria-haspopup', 'dialog');
+    btn.setAttribute('aria-keyshortcuts', 'Alt+Shift+A');
     btn.setAttribute('aria-expanded', 'false');
     btn.setAttribute('aria-controls', 'as-panel');
     btn.innerHTML = ACCESSIBILITY_ICON;
@@ -145,8 +148,10 @@ export class Widget {
   private openPanel(): void {
     if (!this.panel || !this.launcher) return;
     this.isOpen = true;
+    this.setPageInert(true);
     this.panel.setOpen(true);
     this.launcher.setAttribute('aria-expanded', 'true');
+    this.launcher.tabIndex = -1;
     void this.ensureAnalytics();
     this.track('panel_open');
   }
@@ -154,14 +159,31 @@ export class Widget {
   private closePanel(): void {
     if (!this.panel || !this.launcher) return;
     this.isOpen = false;
+    this.setPageInert(false);
     this.panel.setOpen(false);
     this.launcher.setAttribute('aria-expanded', 'false');
+    this.launcher.tabIndex = 0;
     this.launcher.focus();
+  }
+
+  private setPageInert(on: boolean): void {
+    Array.from(document.body.children).forEach((child) => {
+      if (child === this.host) return;
+      if (on) child.setAttribute('inert', '');
+      else child.removeAttribute('inert');
+    });
+    document.body.style.overflow = on ? 'hidden' : '';
   }
 
   private bindGlobalKeys(): void {
     this.escapeHandler = (e: Event) => {
-      if (!(e instanceof KeyboardEvent) || e.key !== 'Escape' || !this.isOpen) return;
+      if (!(e instanceof KeyboardEvent)) return;
+      if (e.altKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
+        e.preventDefault();
+        this.togglePanel();
+        return;
+      }
+      if (e.key !== 'Escape' || !this.isOpen) return;
       e.stopPropagation();
       this.closePanel();
     };
@@ -204,6 +226,7 @@ export class Widget {
     this.updateAllLabels(lang);
     if (this.launcher) {
       this.launcher.setAttribute('aria-label', t('launcherLabel', lang));
+      this.launcher.setAttribute('title', t('launcherLabel', lang));
     }
     this.panel?.updateLabels(lang);
     this.track('language_switch', lang);
@@ -228,12 +251,15 @@ export class Widget {
     this.lang = this.prefs.get().language;
     this.updateAllLabels(this.lang);
     this.panel?.updateLabels(this.lang);
+    this.panel?.announce(t('resetDone', this.lang));
     if (this.launcher) {
       this.launcher.setAttribute('aria-label', t('launcherLabel', this.lang));
+      this.launcher.setAttribute('title', t('launcherLabel', this.lang));
     }
   }
 
   destroy(): void {
+    this.setPageInert(false);
     if (this.escapeHandler) {
       document.removeEventListener('keydown', this.escapeHandler);
     }

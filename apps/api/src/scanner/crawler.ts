@@ -456,10 +456,10 @@ async function crawlHomepage(browser: Browser, baseUrl: string): Promise<string[
       throw new SiteBlockedError(undefined, status ?? undefined);
     }
 
-    // Wix / SPA nav often hydrates after first paint — give it time, then try networkidle.
-    await page.waitForTimeout(2500);
+    // Brief paint wait so SPA nav links exist; skip long networkidle (never comes on ads-heavy sites).
+    await page.waitForTimeout(800);
     try {
-      await page.waitForLoadState('networkidle', { timeout: 8000 });
+      await page.waitForLoadState('networkidle', { timeout: 2500 });
     } catch {
       // Heavy sites never go idle; continue with whatever DOM we have.
     }

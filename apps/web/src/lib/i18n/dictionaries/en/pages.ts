@@ -94,77 +94,70 @@ export const pages: PagesDict = {
     meta: {
       title: 'Services',
       description:
-        'Accessibility auditing, consulting, training, compliance reports, and testing services built for Indian compliance.',
+        'Accessibility audit and reporting for Indian organisations — WCAG 2.2 AA, IS 17802, GIGW 3.0, RPwD, and SEBI.',
     },
     title: 'Services',
     description:
-      'Expert services revenue engine — audits, AT testing, remediation, SEBI packs. Pair with Developer/Professional SaaS or Enterprise programmes.',
+      'One service: a documented accessibility audit and the report your compliance team can act on.',
   },
   servicesHub: {
     meta: {
-      title: 'Accessibility Services Built for Indian Compliance',
+      title: 'Accessibility Audit & Reporting',
       description:
-        'Documented audits, AT testing, remediation, and SEBI evidence — project-based services that sit beside SaaS. Automated scans alone are not full conformance.',
+        'Website widget, automated scans, remediations, certified auditor testing, and document scanning. Ranked findings your team can act on.',
     },
     hero: {
-      title: 'Expert services after your free scan',
+      title: 'Accessibility Audit & Reporting',
       subtitle:
-        'Manual audits, screen-reader testing, remediation, and SEBI/GIGW/RPwD evidence packs — mapped to Indian law. Software helps; experts certify the path.',
-      primaryCta: 'Get a free scan',
-      secondaryCta: 'Book compliance audit',
+        'Find the barriers, get a ranked report, and remediate what can be fixed in files. Certified Assurance adds manual testing by a qualified auditor. Automated scans alone are not full conformance.',
+      primaryCta: 'See packages',
+      secondaryCta: 'Run a free scan first',
     },
-    servicesGrid: [
-      {
-        id: 'auditing',
-        name: 'Accessibility Auditing',
-        description: 'Automated + manual audits by IAAP-certified experts',
-        href: '/services/accessibility-auditing',
-      },
-      {
-        id: 'consulting',
-        name: 'Accessibility Consulting',
-        description: 'Strategy, roadmaps, and regulatory guidance',
-        href: '/services/accessibility-consulting',
-      },
-      {
-        id: 'training',
-        name: 'Accessibility Training',
-        description: 'Live sessions for developers, QA, and designers',
-        href: '/services/accessibility-training',
-      },
-      {
-        id: 'reports',
-        name: 'Compliance Reports & VPAT',
-        description: 'Audit-ready reports for regulators and stakeholders',
-        href: '/services/compliance-reports',
-      },
-      {
-        id: 'testing',
-        name: 'Accessibility Testing',
-        description: 'Screen reader and keyboard testing services',
-        href: '/services/accessibility-testing',
-      },
-      {
-        id: 'multilingual',
-        name: 'Multilingual Accessibility',
-        description: 'Hindi, Bengali, Tamil support and Devanagari testing',
-        href: '/services/multilingual-accessibility',
-      },
-    ],
+    service: {
+      name: 'What you get',
+      tagline: 'One product. Four website packages.',
+      body: 'Start with a widget or an automated scan. Add remediations when you are ready to fix. Certified Assurance is the monthly programme that includes widget, scan, remediations, and auditor-led testing.',
+      deliverablesTitle: 'In every scan report',
+      deliverables: [
+        'Accessibility score and severity breakdown',
+        'Each issue mapped to WCAG 2.2 AA',
+        'Page URL, selector, and plain-language fix',
+        'Prioritized list your engineers can work from',
+        'Downloadable PDF (and HTML) for your records',
+      ],
+      processTitle: 'How the audit runs',
+      process: [
+        {
+          step: '01',
+          title: 'Scope the asset',
+          description: 'URL, templates, and the journeys that matter — login, pay, apply, support.',
+        },
+        {
+          step: '02',
+          title: 'Scan + specialist review',
+          description: 'Automated rules first, then keyboard and sample screen-reader checks.',
+        },
+        {
+          step: '03',
+          title: 'Report & roadmap',
+          description: 'Ranked findings, owners, and a pack you can show internal audit or a regulator.',
+        },
+      ],
+    },
     whyIndia: {
-      title: 'Why India-specific matters',
+      title: 'Why teams buy this',
       stats: [
         {
-          value: '155',
-          label: 'Organisations penalised by CCPD by 2025',
+          value: '1 in 6',
+          label: 'People worldwide live with a significant disability (WHO)',
         },
         {
-          value: '2024 INSC 858',
-          label: 'Supreme Court ruling making standards enforceable',
+          value: 'WCAG 2.2',
+          label: 'The baseline most regulators and buyers now expect',
         },
         {
-          value: 'July 2026',
-          label: 'SEBI phased compliance deadlines',
+          value: '96%',
+          label: 'Of home pages still have detectable WCAG failures (WebAIM)',
         },
       ],
     },

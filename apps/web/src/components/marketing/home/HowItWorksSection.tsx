@@ -24,11 +24,11 @@ export function HowItWorksSection({ locale }: { locale: Locale }) {
             return (
               <li
                 key={step.title}
-                className="relative rounded-lg border border-gray-200 bg-white p-6 shadow-sm"
+                className="relative rounded-lg border border-white/10 bg-[#12121a] p-6"
               >
                 <div className="flex items-center justify-center">
                   <div
-                    className="flex h-14 w-14 items-center justify-center rounded-full bg-primary-50 text-primary-600 ring-2 ring-primary-100"
+                    className="flex h-14 w-14 items-center justify-center rounded-full bg-primary-600/20 text-primary-300 ring-2 ring-primary-400/30"
                     aria-hidden="true"
                   >
                     <Icon className="h-7 w-7" strokeWidth={1.75} />

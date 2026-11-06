@@ -42,7 +42,7 @@ export function UserMenu() {
     <DropdownMenu
       trigger={
         <button
-          className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 text-primary-700 hover:bg-primary-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-violet-950 text-violet-200 hover:bg-violet-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
           aria-label="User menu"
         >
           <User className="h-5 w-5" aria-hidden="true" />

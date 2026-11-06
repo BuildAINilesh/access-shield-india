@@ -1,0 +1,330 @@
+/**
+ * App-wide dark theme — Snyk-style black canvas + high-contrast violet.
+ * Applied via html.app-dark (all pages) and .marketing-dark (marketing shell).
+ * Contrast targets: body text ≥ 4.5:1, UI chrome ≥ 3:1 on #07070c.
+ */
+
+:is(.app-dark, .marketing-dark) {
+  --md-bg: #07070c;
+  --md-bg-elevated: #12121a;
+  --md-bg-elevated-2: #1a1a24;
+  --md-text: #f4f4f5;
+  --md-text-muted: #d4d4d8;
+  --md-text-dim: #a1a1aa;
+  --md-border: #3f3f46;
+  --md-violet: #c4b5fd;
+  --md-violet-strong: #a78bfa;
+  --md-glow: rgba(124, 58, 237, 0.35);
+  --tw-ring-offset-color: #07070c;
+  color: var(--md-text);
+  background-color: var(--md-bg);
+}
+
+:is(.app-dark, .marketing-dark) :focus-visible {
+  outline: 2px solid #c4b5fd;
+  outline-offset: 2px;
+}
+
+/* ── Surfaces ─────────────────────────────────────────────── */
+:is(.app-dark, .marketing-dark) .bg-white,
+:is(.app-dark, .marketing-dark) .bg-bg-primary,
+:is(.app-dark, .marketing-dark) .bg-bg-secondary,
+:is(.app-dark, .marketing-dark) .bg-bg-tertiary,
+:is(.app-dark, .marketing-dark) .bg-gray-50,
+:is(.app-dark, .marketing-dark) .bg-gray-100\/80,
+:is(.app-dark, .marketing-dark) .bg-gray-100,
+:is(.app-dark, .marketing-dark) .bg-primary-50,
+:is(.app-dark, .marketing-dark) .bg-primary-50\/40,
+:is(.app-dark, .marketing-dark) .bg-primary-100,
+:is(.app-dark, .marketing-dark) .bg-primary-light {
+  background-color: var(--md-bg-elevated) !important;
+}
+
+:is(.app-dark, .marketing-dark) .bg-gray-200,
+:is(.app-dark, .marketing-dark) .bg-gray-300 {
+  background-color: #3f3f46 !important;
+}
+
+:is(.app-dark, .marketing-dark) .bg-white\/80,
+:is(.app-dark, .marketing-dark) .bg-white\/95 {
+  background-color: rgb(18 18 26 / 0.92) !important;
+}
+
+:is(.app-dark, .marketing-dark) .bg-gradient-to-b.from-primary-100,
+:is(.app-dark, .marketing-dark) .bg-gradient-to-b.from-primary-50,
+:is(.app-dark, .marketing-dark) .from-primary-100,
+:is(.app-dark, .marketing-dark) .from-primary-50,
+:is(.app-dark, .marketing-dark) .via-primary-50,
+:is(.app-dark, .marketing-dark) .via-white,
+:is(.app-dark, .marketing-dark) .to-white {
+  --tw-gradient-from: #07070c var(--tw-gradient-from-position);
+  --tw-gradient-to: rgb(7 7 12 / 0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), #0c0c14, var(--tw-gradient-to);
+}
+
+:is(.app-dark, .marketing-dark) .to-white {
+  --tw-gradient-to: #07070c var(--tw-gradient-to-position);
+}
+
+/* ── Type ─────────────────────────────────────────────────── */
+:is(.app-dark, .marketing-dark) .text-text-primary,
+:is(.app-dark, .marketing-dark) .text-gray-900,
+:is(.app-dark, .marketing-dark) .text-gray-800,
+:is(.app-dark, .marketing-dark) .text-gray-700,
+:is(.app-dark, .marketing-dark) .text-black {
+  color: var(--md-text) !important;
+}
+
+:is(.app-dark, .marketing-dark) .text-text-secondary,
+:is(.app-dark, .marketing-dark) .text-gray-600,
+:is(.app-dark, .marketing-dark) .text-gray-500 {
+  color: var(--md-text-muted) !important;
+}
+
+:is(.app-dark, .marketing-dark) .text-text-tertiary,
+:is(.app-dark, .marketing-dark) .text-gray-400,
+:is(.app-dark, .marketing-dark) .text-gray-300 {
+  color: var(--md-text-dim) !important;
+}
+
+:is(.app-dark, .marketing-dark) .text-primary,
+:is(.app-dark, .marketing-dark) .text-primary-dark,
+:is(.app-dark, .marketing-dark) .text-primary-900,
+:is(.app-dark, .marketing-dark) .text-primary-800,
+:is(.app-dark, .marketing-dark) .text-primary-700,
+:is(.app-dark, .marketing-dark) .text-primary-600 {
+  color: var(--md-violet) !important;
+}
+
+:is(.app-dark, .marketing-dark) .text-success-700,
+:is(.app-dark, .marketing-dark) .text-emerald-700 {
+  color: #86efac !important;
+}
+
+:is(.app-dark, .marketing-dark) .text-error-700,
+:is(.app-dark, .marketing-dark) .text-error-800,
+:is(.app-dark, .marketing-dark) .text-red-600,
+:is(.app-dark, .marketing-dark) .text-red-700 {
+  color: #fca5a5 !important;
+}
+
+:is(.app-dark, .marketing-dark) .text-accent-700,
+:is(.app-dark, .marketing-dark) .text-amber-900,
+:is(.app-dark, .marketing-dark) .text-warning-700 {
+  color: #fcd34d !important;
+}
+
+:is(.app-dark, .marketing-dark) .placeholder\:text-text-tertiary::placeholder {
+  color: #a1a1aa;
+}
+
+/* ── Borders ──────────────────────────────────────────────── */
+:is(.app-dark, .marketing-dark) .border-border,
+:is(.app-dark, .marketing-dark) .border-gray-200,
+:is(.app-dark, .marketing-dark) .border-gray-300,
+:is(.app-dark, .marketing-dark) .border-primary-100,
+:is(.app-dark, .marketing-dark) .border-primary-200,
+:is(.app-dark, .marketing-dark) .border-primary-300,
+:is(.app-dark, .marketing-dark) .hover\:border-gray-300:hover {
+  border-color: var(--md-border) !important;
+}
+
+:is(.app-dark, .marketing-dark) .border-amber-200 {
+  border-color: #854d0e !important;
+}
+
+:is(.app-dark, .marketing-dark) .bg-amber-50,
+:is(.app-dark, .marketing-dark) .bg-accent-light {
+  background-color: #1c1408 !important;
+}
+
+:is(.app-dark, .marketing-dark) .bg-error-100 {
+  background-color: #3f1212 !important;
+}
+
+:is(.app-dark, .marketing-dark) .bg-success-100 {
+  background-color: #052e16 !important;
+}
+
+:is(.app-dark, .marketing-dark) .divide-gray-100 > :not([hidden]) ~ :not([hidden]),
+:is(.app-dark, .marketing-dark) .divide-gray-200 > :not([hidden]) ~ :not([hidden]) {
+  border-color: var(--md-border);
+}
+
+/* ── Shadows / hover wash ─────────────────────────────────── */
+:is(.app-dark, .marketing-dark) .shadow-sm,
+:is(.app-dark, .marketing-dark) .shadow,
+:is(.app-dark, .marketing-dark) .shadow-md,
+:is(.app-dark, .marketing-dark) .shadow-xl,
+:is(.app-dark, .marketing-dark) .shadow-2xl {
+  --tw-shadow-color: rgb(124 58 237 / 0.18);
+}
+
+:is(.app-dark, .marketing-dark) .hover\:bg-gray-100:hover,
+:is(.app-dark, .marketing-dark) .hover\:bg-bg-secondary:hover,
+:is(.app-dark, .marketing-dark) .hover\:bg-primary-50:hover {
+  background-color: var(--md-bg-elevated-2) !important;
+}
+
+:is(.app-dark, .marketing-dark) .hover\:text-primary-600:hover,
+:is(.app-dark, .marketing-dark) .hover\:text-primary-700:hover,
+:is(.app-dark, .marketing-dark) .group:hover .group-hover\:text-primary-600 {
+  color: #e9d5ff !important;
+}
+
+/* ── Inputs ───────────────────────────────────────────────── */
+:is(.app-dark, .marketing-dark) input,
+:is(.app-dark, .marketing-dark) textarea,
+:is(.app-dark, .marketing-dark) select {
+  background-color: var(--md-bg-elevated);
+  color: var(--md-text);
+  border-color: var(--md-border);
+}
+
+:is(.app-dark, .marketing-dark) input::placeholder,
+:is(.app-dark, .marketing-dark) textarea::placeholder {
+  color: #a1a1aa;
+}
+
+/* ── Buttons on dark (inline styles need override) ────────── */
+:is(.app-dark, .marketing-dark) [data-as-btn='secondary'] {
+  background-color: transparent !important;
+  border-color: #c4b5fd !important;
+  color: #ede9fe !important;
+}
+
+:is(.app-dark, .marketing-dark) [data-as-btn='secondary']:hover:not(:disabled):not([aria-disabled='true']) {
+  background-color: rgb(124 58 237 / 0.2) !important;
+  border-color: #e9d5ff !important;
+  color: #ffffff !important;
+}
+
+:is(.app-dark, .marketing-dark) [data-as-btn='outline'] {
+  background-color: rgb(124 58 237 / 0.12) !important;
+  border-color: #a78bfa !important;
+  color: #ede9fe !important;
+}
+
+:is(.app-dark, .marketing-dark) [data-as-btn='outline']:hover:not(:disabled):not([aria-disabled='true']) {
+  background-color: rgb(124 58 237 / 0.28) !important;
+  color: #ffffff !important;
+}
+
+:is(.app-dark, .marketing-dark) [data-as-btn='ghost'] {
+  color: #c4b5fd !important;
+}
+
+:is(.app-dark, .marketing-dark) [data-as-btn='ghost']:hover:not(:disabled):not([aria-disabled='true']) {
+  background-color: rgb(124 58 237 / 0.16) !important;
+  color: #ffffff !important;
+}
+
+:is(.app-dark, .marketing-dark) [data-as-btn='onDark'] {
+  background-color: #ffffff !important;
+  border-color: #ffffff !important;
+  color: #3b0764 !important;
+}
+
+:is(.app-dark, .marketing-dark) [data-as-btn='primary'] {
+  box-shadow: 0 0 0 1px rgb(167 139 250 / 0.35), 0 8px 24px rgb(124 58 237 / 0.35);
+}
+
+/* ── Radix dropdown ───────────────────────────────────────── */
+:is(.app-dark, .marketing-dark) [role='menu'],
+:is(.app-dark, .marketing-dark) [data-radix-popper-content-wrapper] [role='menu'] {
+  background-color: var(--md-bg-elevated) !important;
+  border-color: var(--md-border) !important;
+  color: var(--md-text);
+}
+
+/* ── Ambient glow (hero-style tech canvas) ────────────────── */
+:is(.app-dark, .marketing-dark) .md-canvas {
+  position: relative;
+  isolation: isolate;
+}
+
+:is(.app-dark, .marketing-dark) .md-canvas::before {
+  content: '';
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, var(--md-glow), transparent 55%),
+    radial-gradient(ellipse 40% 40% at 90% 10%, rgb(192 132 252 / 0.12), transparent 50%),
+    radial-gradient(ellipse 30% 30% at 10% 20%, rgb(124 58 237 / 0.1), transparent 50%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(.app-dark, .marketing-dark) .md-canvas::before {
+    background: radial-gradient(ellipse 70% 40% at 50% 0%, rgb(124 58 237 / 0.16), transparent 55%);
+  }
+}
+
+/* ── Extra surfaces used by login / dashboard / UI kit ───── */
+:is(.app-dark, .marketing-dark) .border-gray-100,
+:is(.app-dark, .marketing-dark) .border-gray-200\/90,
+:is(.app-dark, .marketing-dark) .border-gray-200\/80 {
+  border-color: var(--md-border) !important;
+}
+
+:is(.app-dark, .marketing-dark) .bg-red-50 {
+  background-color: #3f1212 !important;
+}
+
+:is(.app-dark, .marketing-dark) .bg-green-50,
+:is(.app-dark, .marketing-dark) .bg-green-100 {
+  background-color: #052e16 !important;
+}
+
+:is(.app-dark, .marketing-dark) .text-green-700,
+:is(.app-dark, .marketing-dark) .text-green-800 {
+  color: #86efac !important;
+}
+
+:is(.app-dark, .marketing-dark) .bg-primary-200 {
+  background-color: #2a1a4a !important;
+}
+
+:is(.app-dark, .marketing-dark) .hover\:bg-gray-50:hover {
+  background-color: var(--md-bg-elevated-2) !important;
+}
+
+:is(.app-dark, .marketing-dark) .as-nav-item {
+  color: #d4d4d8;
+}
+
+:is(.app-dark, .marketing-dark) .as-nav-item:hover {
+  background-color: var(--md-bg-elevated-2);
+  color: #f4f4f5;
+}
+
+:is(.app-dark, .marketing-dark) .as-nav-item-active,
+:is(.app-dark, .marketing-dark) .as-nav-item-active:hover {
+  background-color: rgb(124 58 237 / 0.22);
+  color: #ede9fe;
+}
+
+:is(.app-dark, .marketing-dark) [role='dialog'],
+:is(.app-dark, .marketing-dark) [role='listbox'],
+:is(.app-dark, .marketing-dark) [role='menu'] {
+  background-color: var(--md-bg-elevated) !important;
+  border-color: var(--md-border) !important;
+  color: var(--md-text);
+}
+
+:is(.app-dark, .marketing-dark) [data-highlighted] {
+  background-color: rgb(124 58 237 / 0.22) !important;
+}
+
+:is(.app-dark, .marketing-dark) code,
+:is(.app-dark, .marketing-dark) pre {
+  background-color: var(--md-bg-elevated-2);
+  color: var(--md-text);
+}
+
+:is(.app-dark, .marketing-dark) table,
+:is(.app-dark, .marketing-dark) th,
+:is(.app-dark, .marketing-dark) td {
+  border-color: var(--md-border);
+}

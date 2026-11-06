@@ -38,6 +38,11 @@ from services.statement_generator import (
     StatementResponse,
     generate_statement,
 )
+from services.marketing_chat import (
+    MarketingChatRequest,
+    MarketingChatResponse,
+    marketing_chat,
+)
 from services.document_scanner.job_consumer import run_consumer
 from services.document_scanner.router import router as document_scanner_router
 from utils.model_router import (
@@ -351,6 +356,40 @@ async def advise_endpoint(
     except Exception as e:
         ai_errors_total.labels(
             endpoint="/ai/advise",
+            error_type=type(e).__name__,
+        ).inc()
+        raise
+
+
+@app.post("/ai/marketing-chat", response_model=MarketingChatResponse)
+async def marketing_chat_endpoint(
+    request: MarketingChatRequest,
+    x_ai_provider: str | None = Header(None, alias="X-AI-Provider"),
+    x_ai_model: str | None = Header(None, alias="X-AI-Model"),
+) -> MarketingChatResponse:
+    """Answer marketing-site questions about accessibility standards and offerings."""
+    import time
+
+    start_time = time.time()
+
+    try:
+        response = await marketing_chat(
+            request, provider=x_ai_provider, model=x_ai_model
+        )
+
+        ai_requests_total.labels(
+            endpoint="/ai/marketing-chat",
+            cached=str(response.cached).lower(),
+        ).inc()
+        ai_latency_seconds.labels(endpoint="/ai/marketing-chat").observe(
+            time.time() - start_time
+        )
+
+        return response
+
+    except Exception as e:
+        ai_errors_total.labels(
+            endpoint="/ai/marketing-chat",
             error_type=type(e).__name__,
         ).inc()
         raise

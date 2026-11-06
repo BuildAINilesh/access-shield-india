@@ -22,7 +22,7 @@ export function MarketingPageHero({
   const hasVisual = Boolean(visual);
 
   return (
-    <header className="border-b border-gray-200 bg-gradient-to-b from-primary-50 via-white to-white px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+    <header className="md-canvas border-b border-white/10 bg-[#07070c] px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
       <div
         className={
           hasVisual && !centered

@@ -9,7 +9,7 @@ export function WhoWeBuildForSection({ locale }: { locale: Locale }) {
 
   return (
     <section
-      className="border-y border-gray-200 bg-white px-4 py-16 sm:px-6 sm:py-24 lg:px-8"
+      className="border-y border-white/10 bg-[#07070c] px-4 py-16 sm:px-6 sm:py-24 lg:px-8"
       aria-labelledby="who-we-build-for-heading"
     >
       <div className="mx-auto max-w-7xl">
@@ -25,7 +25,7 @@ export function WhoWeBuildForSection({ locale }: { locale: Locale }) {
           </p>
         </div>
 
-        <figure className="relative mx-auto mt-12 max-w-5xl overflow-hidden rounded-2xl border border-gray-200 shadow-lg">
+        <figure className="relative mx-auto mt-12 max-w-5xl overflow-hidden rounded-2xl border border-white/10 shadow-[0_0_50px_rgba(124,58,237,0.15)]">
           <div className="relative aspect-[21/9] w-full">
             <MarketingImage
               src={MARKETING_IMAGES.accessibilityBanner}

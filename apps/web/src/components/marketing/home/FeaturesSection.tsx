@@ -59,7 +59,7 @@ const FEATURES: FeatureCard[] = [
 function CheckIcon() {
   return (
     <svg
-      className="h-4 w-4 shrink-0 text-success-700"
+      className="h-4 w-4 shrink-0 text-emerald-400"
       viewBox="0 0 20 20"
       fill="currentColor"
       aria-hidden="true"
@@ -76,7 +76,7 @@ function CheckIcon() {
 export function FeaturesSection({ locale }: { locale: Locale }) {
   return (
     <section
-      className="border-y border-gray-200 bg-bg-secondary px-4 py-16 sm:px-6 sm:py-24 lg:px-8"
+      className="border-y border-white/10 bg-[#0a0a10] px-4 py-16 sm:px-6 sm:py-24 lg:px-8"
       aria-labelledby="features-heading"
     >
       <div className="mx-auto max-w-7xl">
@@ -102,7 +102,7 @@ export function FeaturesSection({ locale }: { locale: Locale }) {
             return (
               <article
                 key={feature.id}
-                className="relative flex flex-col rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
+                className="relative flex flex-col rounded-xl border border-white/10 bg-[#12121a] p-6 shadow-[0_0_0_1px_rgba(124,58,237,0.08)] transition-shadow hover:border-primary-400/40 hover:shadow-[0_0_40px_rgba(124,58,237,0.15)]"
               >
                 {feature.badge && (
                   <div className="absolute -top-3 right-4">
@@ -118,7 +118,7 @@ export function FeaturesSection({ locale }: { locale: Locale }) {
 
                 <div className="flex items-center gap-3">
                   <div
-                    className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary-50 text-primary-600"
+                    className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary-600/20 text-primary-300"
                     aria-hidden="true"
                   >
                     <Icon className="h-6 w-6" strokeWidth={1.75} />
@@ -134,8 +134,8 @@ export function FeaturesSection({ locale }: { locale: Locale }) {
                 </p>
 
                 {feature.highlight && (
-                  <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3">
-                    <p className="text-sm leading-normal text-amber-900">
+                  <div className="mt-4 rounded-lg border border-amber-400/30 bg-amber-400/10 p-3">
+                    <p className="text-sm leading-normal text-amber-200">
                       <span className="font-semibold">Note:</span> {feature.highlight}
                     </p>
                   </div>

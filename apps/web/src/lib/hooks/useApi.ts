@@ -134,7 +134,7 @@ export function useScan(scanId: string | null, options?: Partial<UseQueryOptions
     refetchInterval: (query) => {
       const status = query.state.data?.status;
       const isActive = status === 'running' || status === 'pending';
-      return isActive ? 3000 : false;
+      return isActive ? 1500 : false;
     },
     ...options,
   });
@@ -226,7 +226,7 @@ export function useScans(params?: ListScansParams) {
     refetchInterval: (query) => {
       const rows = query.state.data?.rows ?? [];
       const hasActive = rows.some((scan) => scan.status === 'running' || scan.status === 'pending');
-      return hasActive ? 5000 : false;
+      return hasActive ? 2500 : false;
     },
   });
 }
@@ -319,7 +319,7 @@ export function useMobileScan(mobileScanId: string | null) {
     refetchInterval: (query) => {
       const status = query.state.data?.status;
       const isActive = status === 'running' || status === 'pending';
-      return isActive ? 5000 : false;
+      return isActive ? 2000 : false;
     },
   });
 }
@@ -449,7 +449,7 @@ export function useDocumentScanStatus(jobId: string | null) {
     refetchInterval: (query) => {
       const status = query.state.data?.status;
       const isActive = status === 'queued' || status === 'processing';
-      return isActive ? 3000 : false;
+      return isActive ? 1500 : false;
     },
   });
 }
@@ -478,7 +478,7 @@ export function useDocumentScans(params?: ListDocumentScansParams) {
       const hasActive = scans.some(
         (scan) => scan.status === 'queued' || scan.status === 'processing',
       );
-      return hasActive ? 5000 : false;
+      return hasActive ? 2500 : false;
     },
   });
 }

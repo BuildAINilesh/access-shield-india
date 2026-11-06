@@ -17,6 +17,7 @@ export interface CommonDict {
     documentScanner: string;
     blog: string;
     pricing: string;
+    contact: string;
     scan: string;
     signIn: string;
     startTrial: string;
@@ -81,6 +82,28 @@ export interface CommonDict {
   status: {
     ready: string;
     inReview: string;
+  };
+  chatbot: {
+    launcherLabel: string;
+    closeLabel: string;
+    title: string;
+    subtitle: string;
+    inputLabel: string;
+    inputPlaceholder: string;
+    send: string;
+    startVoice: string;
+    stopVoice: string;
+    listening: string;
+    voiceUnsupported: string;
+    voiceRepliesOn: string;
+    voiceRepliesOff: string;
+    stopSpeaking: string;
+    thinking: string;
+    error: string;
+    suggestionsLabel: string;
+    openPage: string;
+    greeting: string;
+    starterPrompts: string[];
   };
 }
 
@@ -346,12 +369,15 @@ export interface ServicesHubContent {
     primaryCta: string;
     secondaryCta: string;
   };
-  servicesGrid: Array<{
-    id: string;
+  service: {
     name: string;
-    description: string;
-    href: string;
-  }>;
+    tagline: string;
+    body: string;
+    deliverablesTitle: string;
+    deliverables: string[];
+    processTitle: string;
+    process: Array<{ step: string; title: string; description: string }>;
+  };
   whyIndia: {
     title: string;
     stats: Array<{ value: string; label: string }>;
@@ -514,6 +540,18 @@ export interface PricingDict {
   hero: {
     title: string;
     subtitle: string;
+  };
+  packages: {
+    stepLabel: string;
+    title: string;
+    subtitle: string;
+    note: string;
+    currencyLabel: string;
+    inr: string;
+    usd: string;
+    documentsStepLabel: string;
+    documentsTitle: string;
+    documentsSubtitle: string;
   };
   oneTime: {
     title: string;

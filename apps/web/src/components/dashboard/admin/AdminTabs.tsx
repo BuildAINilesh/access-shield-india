@@ -19,7 +19,7 @@ export function AdminTabs({ tabs, activeTab, onChange, ariaLabel }: AdminTabsPro
     <div
       role="tablist"
       aria-label={ariaLabel}
-      className="inline-flex flex-wrap gap-1 rounded-lg bg-gray-100/80 p-1"
+      className="inline-flex flex-wrap gap-1 rounded-lg border border-zinc-700 bg-[#12121a] p-1"
     >
       {tabs.map((tab) => {
         const isActive = activeTab === tab.id;
@@ -33,10 +33,10 @@ export function AdminTabs({ tabs, activeTab, onChange, ariaLabel }: AdminTabsPro
             aria-controls={`panel-${tab.id}`}
             onClick={() => onChange(tab.id)}
             className={cn(
-              'min-h-11 rounded-md px-3.5 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2',
+              'min-h-11 rounded-md px-3.5 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07070c]',
               isActive
-                ? 'bg-white text-text-primary shadow-sm'
-                : 'text-text-secondary hover:text-text-primary',
+                ? 'bg-[#5b21b6] text-white shadow-sm'
+                : 'text-zinc-200 hover:bg-zinc-800 hover:text-white',
             )}
           >
             {tab.label}

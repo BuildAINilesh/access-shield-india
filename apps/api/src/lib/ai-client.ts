@@ -147,6 +147,55 @@ export async function requestAiFix(
   return (await response.json()) as AiFixResponseBody;
 }
 
+export interface MarketingChatRequestBody {
+  message: string;
+  locale: 'en' | 'hi';
+  history?: Array<{ role: 'user' | 'assistant'; content: string }>;
+}
+
+export interface MarketingChatResponse {
+  reply: string;
+  navigate?: string;
+  suggestions: string[];
+}
+
+/** Public marketing assistant — short timeout so the UI can fall back quickly. */
+export async function requestMarketingChat(
+  body: MarketingChatRequestBody,
+  timeoutMs = 20_000,
+): Promise<MarketingChatResponse> {
+  const { url, internalKey } = getAiServiceConfig();
+  if (!internalKey) {
+    throw new Error('AI service is not configured (INTERNAL_AI_SERVICE_KEY missing)');
+  }
+
+  const backend = resolveAiBackend(process.env.DEFAULT_AI_PROVIDER, process.env.DEFAULT_AI_MODEL);
+  const response = await fetch(`${url}/ai/marketing-chat`, {
+    method: 'POST',
+    headers: aiHeaders('marketing-public', 'professional', internalKey, backend.provider, backend.model),
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(timeoutMs),
+  });
+
+  if (!response.ok) {
+    const detail = await response.text().catch(() => '');
+    logger.warn({ status: response.status, detail }, 'Marketing chat AI request failed');
+    throw new Error('Marketing chat AI failed');
+  }
+
+  const data = (await response.json()) as {
+    reply?: string;
+    navigate?: string | null;
+    suggestions?: string[];
+  };
+
+  return {
+    reply: data.reply ?? '',
+    navigate: data.navigate ?? undefined,
+    suggestions: Array.isArray(data.suggestions) ? data.suggestions : [],
+  };
+}
+
 export async function requestAiAltText(
   body: AiAltTextRequestBody,
   orgId: string,

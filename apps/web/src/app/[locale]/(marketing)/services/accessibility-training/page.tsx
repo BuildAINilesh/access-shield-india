@@ -179,7 +179,7 @@ export default async function AccessibilityTrainingPage({
             Training pricing
           </h2>
           <p className="text-lg leading-normal text-text-secondary">{page.bundle.text}</p>
-          <ButtonLink href="/pricing" size="md" variant="secondary" className="mt-6">
+          <ButtonLink href="/services" size="md" variant="secondary" className="mt-6">
             {page.bundle.linkText}
           </ButtonLink>
         </div>

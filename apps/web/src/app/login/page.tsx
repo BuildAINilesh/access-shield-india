@@ -59,14 +59,14 @@ export default function LoginPage() {
 
   return (
     <main id="main-content" className="flex min-h-screen items-center justify-center px-4">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-md rounded-xl border border-zinc-800 bg-[#12121a] p-8 shadow-[0_0_0_1px_rgb(167_139_250_/_0.12),0_24px_48px_rgb(0_0_0_/_0.45)]">
         <div className="mb-8 flex justify-center">
           <LocaleLink
             href="/"
             className="rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
             aria-label={`${common.brand} — Home`}
           >
-            <BrandLogo variant="full" height={72} priority decorative />
+            <BrandLogo variant="full" height={72} priority decorative onDark />
           </LocaleLink>
         </div>
         <h1 className="text-2xl font-bold text-gray-900">Sign in to AccessibleNow</h1>

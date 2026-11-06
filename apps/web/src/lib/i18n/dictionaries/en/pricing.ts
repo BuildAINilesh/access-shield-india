@@ -2,15 +2,29 @@ import type { PricingDict } from '../types';
 
 export const pricing: PricingDict = {
   page: {
-    title: 'AccessibleNow pricing — India',
+    title: 'AccessibleNow pricing',
     description:
-      'Free scan acquisition, Developer & Professional SaaS, Enterprise programmes, and expert services. +18% GST. Illustrative strategy prices.',
+      'Access Widget, automated site scans, remediations, certified auditor testing, and document scanning. Prices in INR with a USD view.',
     eyebrow: 'Pricing',
   },
   hero: {
-    title: 'From free scan to RPwD-ready programme',
+    title: 'Straightforward packages. One product.',
     subtitle:
-      '+18% GST · Illustrative India pricing · Automated scans alone do not equal full conformance',
+      'Start with a widget or a scan. Add remediations when you are ready. Certified Assurance is the monthly programme with auditor-led testing.',
+  },
+  packages: {
+    stepLabel: 'STEP 01',
+    title: 'Choose a website package.',
+    subtitle:
+      'Four commercial offers — from a one-time widget licence to a monthly certified programme. Toggle INR or USD. Indicative USD uses a published conversion rate.',
+    note: 'Want a preview first? Run a free website scan, then pick a package.',
+    currencyLabel: 'Display currency',
+    inr: 'INR',
+    usd: 'USD',
+    documentsStepLabel: 'STEP 02',
+    documentsTitle: 'Document scanning, billed on usage.',
+    documentsSubtitle:
+      'Fifty document scans are included. After that, each additional scan is charged at the published per-scan rate.',
   },
   oneTime: {
     title: 'Expert services',

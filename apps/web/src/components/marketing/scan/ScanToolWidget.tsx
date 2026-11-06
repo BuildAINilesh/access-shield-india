@@ -58,7 +58,9 @@ export function ScanToolWidget() {
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
   const [error, setError] = useState<string>('');
   const [longScanNotice, setLongScanNotice] = useState(false);
-  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pollInFlightRef = useRef(false);
+  const pollFailuresRef = useRef(0);
   const lastAnnouncedProgress = useRef(0);
 
   const prefillUrl = useSearchParams().get('url') ?? '';
@@ -117,66 +119,89 @@ export function ScanToolWidget() {
       });
       setState('scanning');
       startPolling(result.scanId);
-    } catch (err) {
+    } catch {
       setError('Network error. Please check your connection and try again.');
     }
   };
 
-  const startPolling = (scanId: string) => {
-    pollIntervalRef.current = setInterval(async () => {
-      try {
-        const response = await fetch(apiUrl(`/api/v1/public/scan/${scanId}`));
-        if (!response.ok) {
-          clearInterval(pollIntervalRef.current!);
+  const stopPolling = () => {
+    if (pollIntervalRef.current) {
+      clearInterval(pollIntervalRef.current);
+      pollIntervalRef.current = null;
+    }
+  };
+
+  const fetchScanStatus = async (scanId: string) => {
+    if (pollInFlightRef.current) return;
+    pollInFlightRef.current = true;
+    try {
+      const response = await fetch(apiUrl(`/api/v1/public/scan/${scanId}`));
+      if (!response.ok) {
+        pollFailuresRef.current += 1;
+        if (pollFailuresRef.current >= 4) {
+          stopPolling();
           setState('error');
           setError('Scan polling failed. Please refresh and try again.');
-          return;
         }
+        return;
+      }
 
-        const { data } = await response.json();
-        setScanResult({ ...data, scanId });
+      pollFailuresRef.current = 0;
+      const { data } = await response.json();
+      setScanResult({ ...data, scanId });
 
-        const progress = data.pagesTotal > 0 ? (data.pagesScanned / data.pagesTotal) * 100 : 0;
-        const progressMilestone = Math.floor(progress / 25) * 25;
+      const progress = data.pagesTotal > 0 ? (data.pagesScanned / data.pagesTotal) * 100 : 0;
+      const progressMilestone = Math.floor(progress / 25) * 25;
 
-        if (progressMilestone > lastAnnouncedProgress.current && progressMilestone > 0) {
-          lastAnnouncedProgress.current = progressMilestone;
-        }
+      if (progressMilestone > lastAnnouncedProgress.current && progressMilestone > 0) {
+        lastAnnouncedProgress.current = progressMilestone;
+      }
 
-        if (data.status === 'completed') {
-          clearInterval(pollIntervalRef.current!);
-          setState('results');
-          trackFunnel('scan_completed', { scanId: data.scanId ?? '' });
-        } else if (data.status === 'failed') {
-          clearInterval(pollIntervalRef.current!);
-          setState('error');
-          setError(
-            "We couldn't complete this scan. This can happen with sites that block automated tools. Try a different URL or contact us.",
-          );
-        }
-      } catch (err) {
-        clearInterval(pollIntervalRef.current!);
+      if (data.status === 'completed') {
+        stopPolling();
+        setState('results');
+        trackFunnel('scan_completed', { scanId: data.scanId ?? '' });
+      } else if (data.status === 'failed') {
+        stopPolling();
+        setState('error');
+        setError(
+          "We couldn't complete this scan. This can happen with sites that block automated tools. Try a different URL or contact us.",
+        );
+      }
+    } catch {
+      pollFailuresRef.current += 1;
+      if (pollFailuresRef.current >= 4) {
+        stopPolling();
         setState('error');
         setError('Scan polling failed. Please refresh and try again.');
       }
-    }, 3000);
+    } finally {
+      pollInFlightRef.current = false;
+    }
+  };
 
-    setTimeout(() => {
+  const startPolling = (scanId: string) => {
+    pollFailuresRef.current = 0;
+    void fetchScanStatus(scanId);
+    pollIntervalRef.current = setInterval(() => {
+      void fetchScanStatus(scanId);
+    }, 1200);
+
+    window.setTimeout(() => {
       if (pollIntervalRef.current) {
         setLongScanNotice(true);
       }
-    }, 180000);
+    }, 90000);
   };
 
   useEffect(() => {
     return () => {
-      if (pollIntervalRef.current) {
-        clearInterval(pollIntervalRef.current);
-      }
+      stopPolling();
     };
   }, []);
 
   const handleReset = () => {
+    stopPolling();
     setState('form');
     setScanResult(null);
     setError('');

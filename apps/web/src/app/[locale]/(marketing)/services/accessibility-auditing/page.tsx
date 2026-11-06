@@ -206,7 +206,7 @@ export default async function AccessibilityAuditingPage({
               </p>
             </div>
           </div>
-          <ButtonLink href="/pricing" size="md" variant="secondary" className="mt-8">
+          <ButtonLink href="/services" size="md" variant="secondary" className="mt-8">
             {page.pricing.linkText}
           </ButtonLink>
         </div>

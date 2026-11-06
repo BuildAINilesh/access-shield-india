@@ -78,7 +78,7 @@ export function LoginForm() {
               className="rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
               aria-label={`${common.brand} — Home`}
             >
-              <BrandLogo variant="full" height={72} priority decorative />
+              <BrandLogo variant="full" height={72} priority decorative onDark />
             </LocaleLink>
           </div>
           <h1 className="text-3xl font-bold text-text-primary">Sign in to AccessibleNow</h1>

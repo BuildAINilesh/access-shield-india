@@ -10,7 +10,7 @@ export function StandardsSection({ locale }: { locale: Locale }) {
   const { standards } = home;
 
   return (
-    <section id="standards" className="bg-gray-50 px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+    <section id="standards" className="bg-[#0a0a10] px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <div className="text-center">
           <h2 className="text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">
@@ -24,7 +24,7 @@ export function StandardsSection({ locale }: { locale: Locale }) {
             <Link
               key={standard.href}
               href={localizedHref(standard.href, locale)}
-              className="group rounded-lg border border-gray-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
+              className="group rounded-lg border border-white/10 bg-[#12121a] p-6 transition-shadow hover:border-primary-400/40 hover:shadow-[0_0_40px_rgba(124,58,237,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a10]"
             >
               <span className="text-3xl" aria-hidden="true">
                 {ICONS[index] ?? '📋'}

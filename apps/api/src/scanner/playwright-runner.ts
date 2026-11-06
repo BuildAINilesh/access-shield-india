@@ -34,10 +34,10 @@ const DESKTOP_VIEWPORT = { width: 1280, height: 800 };
 const MOBILE_VIEWPORT = { width: 375, height: 667 };
 
 /** Navigation timeout in milliseconds */
-const NAVIGATION_TIMEOUT = 30000;
+const NAVIGATION_TIMEOUT = 20000;
 
-/** Page load wait time after navigation (SPAs / delayed WAF interstitials) */
-const PAGE_SETTLE_TIME = 2000;
+/** Page load wait after navigation — enough for SPA paint, not a full idle wait. */
+const PAGE_SETTLE_TIME = 700;
 
 const SCREENSHOTS_ENABLED = process.env.SCAN_SCREENSHOTS === 'true';
 
@@ -313,17 +313,14 @@ export async function scanPage(
     let response: import('playwright').Response | null = null;
     try {
       response = await page.goto(url, {
-        waitUntil: 'load',
+        waitUntil: 'domcontentloaded',
         timeout: NAVIGATION_TIMEOUT,
       });
     } catch (navError) {
-      logger.warn(
-        { url, err: navError },
-        'Initial navigation failed, retrying with domcontentloaded',
-      );
+      logger.warn({ url, err: navError }, 'domcontentloaded navigation failed, retrying with load');
 
       response = await page.goto(url, {
-        waitUntil: 'domcontentloaded',
+        waitUntil: 'load',
         timeout: NAVIGATION_TIMEOUT,
       });
     }

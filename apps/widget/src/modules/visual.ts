@@ -1,5 +1,6 @@
 import { t, type TranslationKey } from '../i18n';
 import type { FontSize, Language, WidgetPreferences } from '../types/preferences';
+import { switchRow } from '../ui/controls';
 import type { PreferencesManager } from '../utils/preferences';
 import { injectStyle, removeStyle } from '../utils/inject-css';
 
@@ -150,31 +151,18 @@ export class VisualModule {
           <button type="button" class="as-btn as-btn-segment" data-font="lg" aria-pressed="false">${t('fontSizeLg', l)}</button>
         </div>
       </div>
-      ${this.switchRow('dyslexiaFont', 'dyslexiaFont')}
-      ${this.switchRow('darkMode', 'darkMode')}
-      ${this.switchRow('lightMode', 'lightMode')}
-      ${this.switchRow('highContrast', 'highContrast')}
-      ${this.switchRow('negativeContrast', 'negativeContrast')}
-      ${this.switchRow('grayscale', 'grayscale')}
+      ${switchRow('dyslexiaFont', 'dyslexiaFont', l)}
+      ${switchRow('darkMode', 'darkMode', l)}
+      ${switchRow('lightMode', 'lightMode', l)}
+      ${switchRow('highContrast', 'highContrast', l)}
+      ${switchRow('negativeContrast', 'negativeContrast', l)}
+      ${switchRow('grayscale', 'grayscale', l)}
       <div class="as-control-group">
         <label class="as-label" for="as-saturation">${t('saturation', l)}</label>
         <input type="range" id="as-saturation" class="as-slider" min="0" max="200" value="100"
           aria-valuemin="0" aria-valuemax="200" aria-valuenow="100"
           aria-label="${t('saturation', l)}" />
         <span class="as-slider-value" id="as-saturation-value" aria-live="polite">${t('saturationValue', l, { value: '100' })}</span>
-      </div>`;
-  }
-
-  private switchRow(id: string, key: TranslationKey): string {
-    const l = this.lang;
-    return `
-      <div class="as-control-row">
-        <span class="as-label" id="as-label-${id}">${t(key, l)}</span>
-        <button type="button" class="as-switch" role="switch" aria-checked="false"
-          aria-labelledby="as-label-${id}" data-toggle="${id}" id="as-toggle-${id}">
-          <span class="as-switch-track"><span class="as-switch-thumb"></span></span>
-          <span class="as-switch-text">${t('off', l)}</span>
-        </button>
       </div>`;
   }
 
@@ -246,8 +234,8 @@ export class VisualModule {
       if (btn) {
         btn.setAttribute('aria-checked', String(checked));
         btn.classList.toggle('as-checked', checked);
-        const text = btn.querySelector('.as-switch-text');
-        if (text) text.textContent = t(checked ? 'on' : 'off', this.lang);
+        const state = btn.querySelector('.as-tool-state');
+        if (state) state.textContent = t(checked ? 'on' : 'off', this.lang);
       }
     }
 

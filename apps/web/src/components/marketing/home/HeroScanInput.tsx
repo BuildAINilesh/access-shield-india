@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useState, type FormEvent } from 'react';
+import { useEffect, useId, useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { useDictionary, useLocale } from '@/lib/i18n/locale-context';
 import { localizedHref } from '@/lib/i18n/paths';
@@ -30,6 +30,11 @@ export function HeroScanInput() {
   const errorId = `${inputId}-error`;
   const [url, setUrl] = useState('');
   const [error, setError] = useState('');
+  const scanHref = localizedHref('/scan', locale);
+
+  useEffect(() => {
+    router.prefetch(scanHref);
+  }, [router, scanHref]);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -43,11 +48,11 @@ export function HeroScanInput() {
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="mx-auto mt-10 w-full max-w-xl lg:mx-0">
-      <label htmlFor={inputId} className="block text-base font-semibold text-text-primary">
+    <form onSubmit={handleSubmit} noValidate className="mx-auto mt-8 w-full max-w-xl lg:mx-0">
+      <label htmlFor={inputId} className="block text-base font-semibold text-white">
         {copy.label}
       </label>
-      <div className="mt-3 flex flex-col gap-3 sm:flex-row">
+      <div className="mt-3 flex flex-col overflow-hidden rounded-lg border-2 border-white/20 bg-[#12121a] focus-within:border-violet-400 sm:flex-row">
         <input
           id={inputId}
           name="url"
@@ -60,21 +65,21 @@ export function HeroScanInput() {
           aria-required="true"
           aria-invalid={Boolean(error)}
           aria-describedby={error ? `${errorId} ${hintId}` : hintId}
-          className="min-h-[44px] flex-1 rounded-md border-2 border-border bg-white px-4 text-base text-text-primary placeholder:text-text-tertiary focus-visible:border-primary-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
+          className="min-h-12 flex-1 border-0 bg-transparent px-4 text-base text-white placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400 focus-visible:ring-inset"
         />
         <button
           type="submit"
-          className="min-h-[44px] rounded-md bg-primary-600 px-6 text-base font-semibold text-white shadow-sm hover:bg-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
+          className="min-h-12 shrink-0 bg-[#5b21b6] px-6 text-base font-semibold text-white hover:bg-[#6d28d9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300 focus-visible:ring-offset-2 focus-visible:ring-offset-[#12121a]"
         >
           {copy.submit}
         </button>
       </div>
       {error && (
-        <p id={errorId} role="alert" className="mt-2 text-sm font-medium text-error-700">
+        <p id={errorId} role="alert" className="mt-2 text-sm font-medium text-red-300">
           {error}
         </p>
       )}
-      <p id={hintId} className="mt-2 text-sm text-text-secondary">
+      <p id={hintId} className="mt-2 text-sm text-zinc-400">
         {copy.hint}
       </p>
     </form>

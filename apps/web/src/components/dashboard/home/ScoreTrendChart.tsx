@@ -50,14 +50,15 @@ export function ScoreTrendChart({ scans }: ScoreTrendChartProps) {
       <div className="mt-6 h-64">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-            <XAxis dataKey="date" stroke="#6B7280" style={{ fontSize: '12px' }} />
-            <YAxis domain={[0, 100]} stroke="#6B7280" style={{ fontSize: '12px' }} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#3f3f46" />
+            <XAxis dataKey="date" stroke="#a1a1aa" style={{ fontSize: '12px' }} />
+            <YAxis domain={[0, 100]} stroke="#a1a1aa" style={{ fontSize: '12px' }} />
             <Tooltip
               contentStyle={{
-                backgroundColor: '#FFFFFF',
-                border: '1px solid #D1D5DB',
+                backgroundColor: '#12121a',
+                border: '1px solid #3f3f46',
                 borderRadius: '6px',
+                color: '#f4f4f5',
               }}
             />
             <Line

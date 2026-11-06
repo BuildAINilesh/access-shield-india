@@ -30,7 +30,7 @@ export async function BlogPreviewSection({ locale }: { locale: Locale }) {
   };
 
   return (
-    <section className="bg-gray-50 px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+    <section className="bg-[#0a0a10] px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <div className="flex items-end justify-between">
           <div>

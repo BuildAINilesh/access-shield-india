@@ -1,5 +1,6 @@
 import { t, type TranslationKey } from '../i18n';
 import type { Language, WidgetPreferences } from '../types/preferences';
+import { switchRow } from '../ui/controls';
 import type { PreferencesManager } from '../utils/preferences';
 import { injectElement, injectStyle, removeElement, removeStyle } from '../utils/inject-css';
 
@@ -48,24 +49,11 @@ export class NavigationModule {
     const l = this.lang;
     return `
       <h3 id="as-section-navigation" class="as-section-title">${t('sectionNavigation', l)}</h3>
-      ${this.switchRow('keyboardNavMode', 'keyboardNavMode')}
+      ${switchRow('keyboardNavMode', 'keyboardNavMode', l)}
       <div class="as-control-row">
         <button type="button" class="as-btn as-btn-action" id="as-skip-nav-btn">${t('skipNavigation', l)}</button>
       </div>
-      ${this.switchRow('focusTracker', 'focusTracker')}`;
-  }
-
-  private switchRow(id: string, key: TranslationKey): string {
-    const l = this.lang;
-    return `
-      <div class="as-control-row">
-        <span class="as-label" id="as-label-${id}">${t(key, l)}</span>
-        <button type="button" class="as-switch" role="switch" aria-checked="false"
-          aria-labelledby="as-label-${id}" data-toggle="${id}" id="as-toggle-${id}">
-          <span class="as-switch-track"><span class="as-switch-thumb"></span></span>
-          <span class="as-switch-text">${t('off', l)}</span>
-        </button>
-      </div>`;
+      ${switchRow('focusTracker', 'focusTracker', l)}`;
   }
 
   private bindEvents(): void {
@@ -104,8 +92,8 @@ export class NavigationModule {
       if (btn) {
         btn.setAttribute('aria-checked', String(checked));
         btn.classList.toggle('as-checked', checked);
-        const text = btn.querySelector('.as-switch-text');
-        if (text) text.textContent = t(checked ? 'on' : 'off', this.lang);
+        const state = btn.querySelector('.as-tool-state');
+        if (state) state.textContent = t(checked ? 'on' : 'off', this.lang);
       }
     }
   }

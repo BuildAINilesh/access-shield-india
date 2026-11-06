@@ -113,17 +113,17 @@ export function StoryCarousel() {
     <MotionConfig reducedMotion="user">
       <section
         aria-labelledby="story-carousel-heading"
-        className="overflow-hidden bg-primary-900 px-4 py-8 sm:px-6 sm:py-10 lg:px-8"
+        className="border-b border-white/10 bg-[#07070c] px-4 py-10 sm:px-6 sm:py-12 lg:px-8"
       >
         <div className="mx-auto max-w-7xl">
-          <div className="text-center">
+          <div className="max-w-3xl">
             <h2
               id="story-carousel-heading"
-              className="text-2xl font-bold tracking-tight text-white sm:text-3xl"
+              className="text-2xl font-semibold tracking-tight text-white sm:text-3xl"
             >
               {copy.title}
             </h2>
-            <p className="mx-auto mt-2 max-w-2xl text-base leading-normal text-primary-100 sm:text-lg">
+            <p className="mt-2 text-base leading-normal text-zinc-400 sm:text-lg">
               {copy.subtitle}
             </p>
           </div>
@@ -139,7 +139,7 @@ export function StoryCarousel() {
             className="mt-6"
           >
             <div
-              className="grid overflow-hidden rounded-2xl bg-white/5 ring-1 ring-white/10 lg:grid-cols-12"
+              className="grid overflow-hidden rounded-xl border border-white/10 bg-[#12121a] lg:grid-cols-12"
               onTouchStart={handleTouchStart}
               onTouchEnd={handleTouchEnd}
             >
@@ -187,22 +187,24 @@ export function StoryCarousel() {
                       exit={{ opacity: 0, y: -12 }}
                       transition={{ duration: 0.35 }}
                     >
-                      <p className="text-sm font-semibold uppercase tracking-wide text-primary-100">
+                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">
                         {slide.eyebrow}
                       </p>
-                      <h3 className="mt-3 text-2xl font-bold leading-tight text-white sm:text-3xl">
+                      <h3 className="mt-3 text-2xl font-semibold leading-tight text-white sm:text-[1.75rem]">
                         {slide.title}
                       </h3>
-                      <p className="mt-4 text-base leading-relaxed text-primary-100 sm:text-lg">
+                      <p className="mt-4 text-base leading-relaxed text-zinc-300 sm:text-lg">
                         {slide.body}
                       </p>
                       <p className="mt-6 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                        <span className="text-4xl font-bold text-amber-300">{slide.stat}</span>
-                        <span className="text-base leading-normal text-white">
+                        <span className="text-3xl font-semibold tabular-nums text-white">
+                          {slide.stat}
+                        </span>
+                        <span className="text-sm leading-normal text-zinc-400">
                           {slide.statLabel}
                         </span>
                       </p>
-                      <ButtonLink href={slide.href} size="lg" variant="onDark" className="mt-8">
+                      <ButtonLink href={slide.href} size="md" variant="primary" className="mt-8">
                         {slide.cta}
                       </ButtonLink>
                     </motion.div>
@@ -211,11 +213,11 @@ export function StoryCarousel() {
 
                 <div className="space-y-4">
                   <div
-                    className="h-1 w-full overflow-hidden rounded-full bg-white/20"
+                    className="h-0.5 w-full overflow-hidden rounded-full bg-white/10"
                     aria-hidden="true"
                   >
                     <div
-                      className="h-full origin-left rounded-full bg-amber-300 motion-safe:transition-transform motion-safe:duration-100 motion-safe:ease-linear"
+                      className="h-full origin-left rounded-full bg-white motion-safe:transition-transform motion-safe:duration-100 motion-safe:ease-linear"
                       style={{ transform: `scaleX(${progress})` }}
                     />
                   </div>
@@ -266,7 +268,7 @@ export function StoryCarousel() {
                                 'block h-2.5 rounded-full motion-safe:transition-all',
                                 index === active
                                   ? 'w-6 bg-white'
-                                  : 'w-2.5 bg-primary-300 group-hover:bg-white',
+                                  : 'w-2.5 bg-zinc-600 group-hover:bg-zinc-300',
                               )}
                             />
                           </button>
@@ -285,4 +287,4 @@ export function StoryCarousel() {
 }
 
 const controlClass =
-  'flex h-11 w-11 items-center justify-center rounded-full border-2 border-white/40 text-white hover:border-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary-900';
+  'flex h-11 w-11 items-center justify-center rounded-md border border-white/15 text-zinc-200 hover:border-white/40 hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#12121a]';

@@ -1,5 +1,6 @@
 import { t, type TranslationKey } from '../i18n';
 import type { Language, WidgetPreferences } from '../types/preferences';
+import { switchRow } from '../ui/controls';
 import {
   extractPageText,
   extractSelectionText,
@@ -78,8 +79,8 @@ export class SpeechModule {
     if (toggle) {
       toggle.setAttribute('aria-checked', String(prefs.textToSpeech));
       toggle.classList.toggle('as-checked', prefs.textToSpeech);
-      const text = toggle.querySelector('.as-switch-text');
-      if (text) text.textContent = t(prefs.textToSpeech ? 'on' : 'off', this.lang);
+      const state = toggle.querySelector('.as-tool-state');
+      if (state) state.textContent = t(prefs.textToSpeech ? 'on' : 'off', this.lang);
     }
 
     const rateKeys: SpeechRateKey[] = ['slow', 'normal', 'fast'];
@@ -107,7 +108,7 @@ export class SpeechModule {
       <p id="as-speech-unsupported" class="as-hint" ${supported ? 'hidden' : ''} role="alert">
         ${t('speechUnsupported', l)}
       </p>
-      ${this.switchRow('textToSpeech', 'readOnHover')}
+      ${switchRow('textToSpeech', 'readOnHover', l)}
       <p id="as-read-on-hover-hint" class="as-hint">${t('readOnHoverHint', l)}</p>
       <div class="as-control-group" role="group" aria-labelledby="as-label-speechRate">
         <span class="as-label" id="as-label-speechRate">${t('speechRate', l)}</span>
@@ -123,19 +124,6 @@ export class SpeechModule {
         <button type="button" class="as-btn as-btn-action as-btn-stop" id="as-stop-speech">${t('stopSpeech', l)}</button>
       </div>
       <p id="as-speech-status" class="as-speech-status" role="status" aria-live="polite" aria-atomic="true"></p>`;
-  }
-
-  private switchRow(id: string, key: TranslationKey): string {
-    const l = this.lang;
-    return `
-      <div class="as-control-row">
-        <span class="as-label" id="as-label-${id}">${t(key, l)}</span>
-        <button type="button" class="as-switch" role="switch" aria-checked="false"
-          aria-labelledby="as-label-${id}" data-toggle="${id}" id="as-toggle-${id}">
-          <span class="as-switch-track"><span class="as-switch-thumb"></span></span>
-          <span class="as-switch-text">${t('off', l)}</span>
-        </button>
-      </div>`;
   }
 
   private rateBtn(key: SpeechRateKey, labelKey: TranslationKey): string {

@@ -19,7 +19,7 @@ export function LiveTicker() {
 
   return (
     <div
-      className="border-y border-primary-200 bg-primary-900 py-3.5"
+      className="border-y border-white/10 bg-[#0a0a10] py-3.5"
       aria-label={home.ticker.aria}
     >
       <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 sm:px-6 lg:px-8">
@@ -28,7 +28,7 @@ export function LiveTicker() {
           aria-controls={controlsId}
           aria-pressed={isPaused}
           onClick={() => setIsPaused((prev) => !prev)}
-          className="shrink-0 rounded-md border border-primary-400 bg-primary-800 px-3 py-2 text-xs font-semibold text-primary-100 hover:bg-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary-900 min-h-[44px] min-w-[44px]"
+          className="min-h-[44px] min-w-[44px] shrink-0 rounded-md border border-white/15 bg-white/5 px-3 py-2 text-xs font-semibold text-zinc-200 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a10]"
         >
           {isPaused ? common.actions.play : common.actions.pause}
         </button>
@@ -45,10 +45,10 @@ export function LiveTicker() {
             {[...sectors, ...sectors].map((sector, i) => (
               <div key={i} className="flex items-center gap-2.5 whitespace-nowrap">
                 <span
-                  className="inline-block h-2 w-2 rounded-full bg-accent-600"
+                  className="inline-block h-1.5 w-1.5 rounded-full bg-zinc-500"
                   aria-hidden="true"
                 />
-                <span className="text-sm font-medium text-primary-100">{sector}</span>
+                <span className="text-sm font-medium text-zinc-300">{sector}</span>
               </div>
             ))}
           </div>

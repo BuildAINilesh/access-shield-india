@@ -1,15 +1,13 @@
 'use client';
 
-import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { ChevronDown, Globe } from 'lucide-react';
+import { DropdownMenu } from '@accessshield/ui';
 import type { Locale } from '@/lib/i18n/config';
 import { LOCALE_COOKIE } from '@/lib/i18n/config';
 import { isLocaleAgnosticPath, localizedHref, pathnameHasHiPrefix } from '@/lib/i18n/paths';
 import { useDictionary, useLocale } from '@/lib/i18n/locale-context';
 import { cn } from '@/lib/utils';
-
-const switcherClass =
-  'inline-flex min-h-[44px] items-center gap-1 rounded-md border border-gray-300 bg-white px-2.5 text-sm font-medium text-text-secondary hover:border-primary-300 hover:text-primary-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2';
 
 /** Pathname without /hi prefix — usePathname() returns internal path after rewrite */
 function logicalPath(pathname: string, locale: string): string {
@@ -26,6 +24,8 @@ function setLocaleCookie(locale: Locale): void {
   document.cookie = `${LOCALE_COOKIE}=${locale}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`;
 }
 
+const LOCALES: Locale[] = ['en', 'hi'];
+
 export function LanguageSwitcher({ className }: { className?: string }) {
   const locale = useLocale();
   const { common } = useDictionary();
@@ -34,66 +34,49 @@ export function LanguageSwitcher({ className }: { className?: string }) {
   const path = logicalPath(pathname, locale);
   const cookieOnly = isLocaleAgnosticPath(path);
 
+  const labels: Record<Locale, string> = {
+    en: common.language.en,
+    hi: common.language.hi,
+  };
+
+  const shortLabels: Record<Locale, string> = {
+    en: 'EN',
+    hi: 'हिं',
+  };
+
   function switchLocale(target: Locale) {
     if (target === locale) return;
     setLocaleCookie(target);
-    router.refresh();
+    if (cookieOnly) {
+      router.refresh();
+      return;
+    }
+    router.push(localizedHref(path, target));
   }
 
-  const enClass = cn(
-    switcherClass,
-    locale === 'en' && 'border-primary-600 bg-primary-50 text-primary-700',
-  );
-  const hiClass = cn(
-    switcherClass,
-    locale === 'hi' && 'border-primary-600 bg-primary-50 text-primary-700',
-  );
-
   return (
-    <div
-      className={cn('flex items-center gap-1', className)}
-      role="group"
-      aria-label={common.language.label}
-    >
-      {cookieOnly ? (
-        <>
+    <div className={cn(className)}>
+      <DropdownMenu
+        align="end"
+        ariaLabel={common.language.label}
+        trigger={
           <button
             type="button"
-            onClick={() => switchLocale('en')}
-            className={enClass}
-            aria-current={locale === 'en' ? 'true' : undefined}
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-md px-2.5 text-sm font-medium text-text-secondary transition-colors hover:bg-bg-secondary hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
+            aria-label={`${common.language.label}: ${labels[locale]}`}
           >
-            {common.language.en}
+            <Globe className="h-4 w-4 shrink-0" aria-hidden="true" />
+            <span>{shortLabels[locale]}</span>
+            <ChevronDown className="h-3.5 w-3.5 shrink-0 opacity-70" aria-hidden="true" />
           </button>
-          <button
-            type="button"
-            onClick={() => switchLocale('hi')}
-            className={hiClass}
-            aria-current={locale === 'hi' ? 'true' : undefined}
-          >
-            {common.language.hi}
-          </button>
-        </>
-      ) : (
-        <>
-          <Link
-            href={localizedHref(path, 'en')}
-            hrefLang="en"
-            className={enClass}
-            aria-current={locale === 'en' ? 'true' : undefined}
-          >
-            {common.language.en}
-          </Link>
-          <Link
-            href={localizedHref(path, 'hi')}
-            hrefLang="hi"
-            className={hiClass}
-            aria-current={locale === 'hi' ? 'true' : undefined}
-          >
-            {common.language.hi}
-          </Link>
-        </>
-      )}
+        }
+        items={LOCALES.map((code) => ({
+          id: code,
+          label: labels[code],
+          onSelect: () => switchLocale(code),
+          shortcut: code === locale ? '✓' : undefined,
+        }))}
+      />
     </div>
   );
 }

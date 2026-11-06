@@ -22,12 +22,12 @@ export function TopBar() {
     });
 
   return (
-    <header className="flex h-14 items-center justify-between border-b border-gray-200/90 bg-white px-5">
+    <header className="flex h-14 items-center justify-between border-b border-zinc-800 bg-[#12121a] px-5">
       <Breadcrumb items={breadcrumbItems} aria-label="Breadcrumb navigation" />
 
       <div className="flex items-center gap-4">
         <button
-          className="relative inline-flex h-10 w-10 items-center justify-center rounded-full text-text-secondary hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
+          className="relative inline-flex h-10 w-10 items-center justify-center rounded-full text-zinc-300 hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-600 focus-visible:ring-offset-2"
           aria-label="Notifications (0 unread)"
         >
           <Bell className="h-5 w-5" aria-hidden="true" />

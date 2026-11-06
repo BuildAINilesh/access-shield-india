@@ -14,7 +14,10 @@ export interface BrandLogoProps {
   height?: number;
   /** Prefer decorative (hide from AT) when adjacent text already names the brand */
   decorative?: boolean;
-  /** Dark plate behind artwork — matches original logo contrast */
+  /**
+   * Light wordmark on dark canvases. Default true — the app chrome is dark.
+   * Pass false only on a light surface.
+   */
   onDark?: boolean;
   /** Eager load for above-the-fold chrome */
   priority?: boolean;
@@ -41,41 +44,84 @@ const ASPECT: Record<BrandLogoVariant, number> = {
 };
 
 /**
- * AccessibleNow brand mark / lockup (Logo2 horizontal).
- * - `full` — icon + wordmark + tagline
- * - `mark` — Ai monogram only
- * - `wordmark` — text lockup only
+ * AccessibleNow brand mark / lockup.
+ * Dark canvases use the transparent mark plus HTML type — CSS invert of the
+ * raster lockup turns anti-aliased black letters into a noisy halo.
  */
 export function BrandLogo({
   variant = 'full',
   className,
   height,
   decorative = false,
-  onDark = false,
+  onDark = true,
   priority = false,
 }: BrandLogoProps) {
   const h = height ?? DEFAULT_HEIGHT[variant];
-  const w = Math.round(h * ASPECT[variant]);
   const alt = decorative ? '' : 'AccessibleNow — Access for everyone. Now.';
+
+  if (!onDark) {
+    const w = Math.round(h * ASPECT[variant]);
+    return (
+      <span className={cn('inline-flex items-center justify-center', className)}>
+        <Image
+          src={SRC[variant]}
+          alt={alt}
+          width={w}
+          height={h}
+          className="h-auto w-auto max-w-full object-contain"
+          style={{ height: h, width: 'auto' }}
+          priority={priority}
+          unoptimized
+        />
+      </span>
+    );
+  }
+
+  const markH = variant === 'wordmark' ? Math.round(h * 0.92) : h;
+  const markW = markH;
+  const titleSize = Math.max(14, Math.round(h * 0.42));
+  const tagSize = Math.max(12, Math.round(h * 0.14));
+  const showTagline = variant !== 'mark' && h >= 56;
+  const showWord = variant !== 'mark';
+  const showMark = variant !== 'wordmark';
 
   return (
     <span
-      className={cn(
-        'inline-flex items-center justify-center',
-        onDark && 'rounded-lg bg-black px-2.5 py-1.5',
-        className,
-      )}
+      className={cn('inline-flex items-center', className)}
+      style={{ gap: Math.max(8, Math.round(h * 0.16)) }}
+      aria-hidden={decorative || undefined}
     >
-      <Image
-        src={SRC[variant]}
-        alt={alt}
-        width={w}
-        height={h}
-        className="h-auto w-auto max-w-full object-contain"
-        style={{ height: h, width: 'auto' }}
-        priority={priority}
-        unoptimized
-      />
+      {showMark ? (
+        <Image
+          src={SRC.mark}
+          alt={decorative || showWord ? '' : alt}
+          width={markW}
+          height={markH}
+          className="shrink-0 object-contain"
+          style={{ height: markH, width: markH }}
+          priority={priority}
+          unoptimized
+        />
+      ) : null}
+      {showWord ? (
+        <span className="flex min-w-0 flex-col justify-center text-left leading-none">
+          <span
+            className="font-sans font-bold tracking-tight"
+            style={{ fontSize: titleSize, lineHeight: 1.05 }}
+          >
+            <span className="text-[#c4b5fd]">Accessible</span>
+            <span className="text-[#f4f4f5]">Now</span>
+          </span>
+          {showTagline ? (
+            <span
+              className="mt-[0.2em] font-sans font-semibold uppercase text-[#a1a1aa]"
+              style={{ fontSize: tagSize, letterSpacing: '0.14em' }}
+            >
+              Access for everyone. Now.
+            </span>
+          ) : null}
+        </span>
+      ) : null}
     </span>
   );
 }

@@ -28,7 +28,7 @@ export default function ScanPage() {
           </h1>
           <p className="mt-4 text-lg leading-normal text-text-secondary">
             Find barriers for people with visual, hearing, and motor disabilities · Up to 10 pages ·
-            Results in 60–90 seconds · No credit card
+            Results as pages finish · No credit card
           </p>
         </div>
 

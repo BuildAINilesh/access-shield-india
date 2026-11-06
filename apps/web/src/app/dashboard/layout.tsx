@@ -23,10 +23,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <DashboardProviders>
         <SkipLink href="#main-content" />
         <SuperAdminShellGuard userRole={userRole} />
-        <div className="dashboard-shell flex h-screen overflow-hidden bg-gray-50">
+        <div className="dashboard-shell flex h-screen overflow-hidden bg-[#07070c]">
           <Sidebar userRole={userRole} />
           <div className="flex flex-1 flex-col overflow-hidden">
-            <div className="flex items-center justify-end gap-2 border-b border-gray-100 bg-white px-4 py-2">
+            <div className="flex items-center justify-end gap-2 border-b border-zinc-800 bg-[#12121a] px-4 py-2">
               <LanguageSwitcher />
             </div>
             <TopBar />
